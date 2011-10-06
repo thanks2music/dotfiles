@@ -33,7 +33,7 @@ cd "~".expand
 if "dotfiles".expand.exist?
   cd "dotfiles"
 else
-  sh "git clone git@github.com:shiwano/dotfiles.git dotfiles"
+  sh "git clone git@github.com:thanks2music/dotfiles.git dotfiles"
   cd "dotfiles"
 end
 

@@ -1,5 +1,5 @@
 #!/bin/sh
-# sh < <( curl https://github.com/shiwano/dotfiles/raw/master/.dotfile-aptget )
+# sh < <( curl https://github.com/thanks2music/dotfiles/raw/master/.dotfile-aptget )
 # this is for intalling essential packages for me in ubuntu
 
 sudo apt-get install -y \

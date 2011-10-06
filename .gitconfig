@@ -1,9 +1,8 @@
 [user]
-  name = Shogo Iwano
-  email = shiwano@gmail.com
+  name = Yoshiyuki Ito
+  email = yoshi.sickboy@gmail.com
 [github]
-  user = shiwano
-  token = 66480ce7a7df36746493534c5efbe23e
+  user = thanks2music
 [core]
   editor = vim
   excludesfile = ~/.gitignore  # globalな.gitignoreの指定
@@ -11,6 +10,7 @@
 [color]
   ui = auto
 [alias]
+  g = git
   st = status
   sh = show
   so = remote show origin
