@@ -24,7 +24,6 @@ filetype plugin indent off
 " Required:
 if has('vim_starting')
   set runtimepath+=~/dotfiles/.vim/bundle/neobundle.vim/
-  call neobundle#rc(expand('~/dotfiles/.vim/bundle/'))
 endif
 
 call neobundle#begin(expand('~/dotfiles/.vim/bundle/'))
@@ -34,10 +33,10 @@ NeoBundleFetch 'Shougo/neobundle.vim'
 
 " My Bundles:
 "" Color scheme
-Bundle "inkpot"
-Bundle 'altercation/vim-colors-solarized'
-Bundle 'hail2u/h2u_colorscheme'
-Bundle 'tomasr/molokai'
+NeoBundle "inkpot"
+NeoBundle 'altercation/vim-colors-solarized'
+NeoBundle 'hail2u/h2u_colorscheme'
+NeoBundle 'tomasr/molokai'
 
 "" Syntax
 NeoBundle 'jquery'
@@ -102,7 +101,6 @@ NeoBundleCheck
 " カラースキーマ
 syntax enable
 set t_Co=256
-autocmd ColorScheme * highlight Comment ctermfg=0
 autocmd ColorScheme * highlight LineNr ctermfg=7 ctermbg=239
 colorscheme h2u_dark
 
@@ -378,7 +376,7 @@ let g:syntastic_objc_auto_refresh_includes = 1
 "" for TypeScript
 let g:syntastic_typescript_checkers = ['tslint']
 "" jQuery Syntax
-au BufRead,BufNewFile *.js set ft=javascript syntax=jquery
+" au BufRead,BufNewFile *.js set ft=javascript syntax=jquery
 
 " quickrun
 let g:quickrun_config = {}
