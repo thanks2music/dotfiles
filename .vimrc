@@ -105,7 +105,6 @@ autocmd ColorScheme * highlight LineNr ctermfg=7 ctermbg=239
 colorscheme h2u_dark
 
 if !has('gui_running')
-  colorscheme solarized
   let g:solarized_termcolors=256
   let g:solarized_termtrans = 1
   let g:solarized_contrast = 'high'
