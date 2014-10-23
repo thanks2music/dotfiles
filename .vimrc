@@ -102,6 +102,7 @@ NeoBundleCheck
 syntax enable
 set t_Co=256
 autocmd ColorScheme * highlight LineNr ctermfg=7 ctermbg=239
+autocmd ColorScheme * highlight Comment ctermfg=8
 colorscheme h2u_dark
 
 if !has('gui_running')
@@ -294,10 +295,8 @@ let b:match_words="{{t:{{/t}}"
 "-------------------------------------------------------------------------------
 " nerd_commenter.vim
 let NERDSpaceDelims = 1
-nmap ,, <Plug>NERDCommenterToggle
-vmap ,, <Plug>NERDCommenterToggle
-nmap ,9 <Plug>NERDCommenterToEOL
-vmap ,s <Plug>NERDCommenterSexy
+nmap <Leader>, <Plug>NERDCommenterToggle
+vmap <Leader>, <Plug>NERDCommenterToggle
 "-------------------------------------------------------------------------------
 " ユーティリティ
 " 現在開いているファイルのある場所に常にcdする
@@ -408,3 +407,9 @@ augroup VimCSS3Syntax
 
   autocmd FileType css setlocal iskeyword+=-
 augroup END
+
+" Gist
+let g:gist_clip_command = 'pbcopy'
+let g:gist_detect_filetype = 1
+let g:gist_open_browser_after_post = 1
+let g:gist_post_private = 1
