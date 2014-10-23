@@ -1,7 +1,9 @@
-"-------------------------------------------------------------------------------
-set nocompatible    " vimですよ
-"-------------------------------------------------------------------------------
-" 変数定義
+"-------------------------------------
+" That's so Vim!
+set nocompatible
+"-------------------------------------
+
+" Vars
 let $TODAY = strftime('%Y%m%d')
 let $DESKTOP = expand('~/desktop')
 
@@ -10,79 +12,107 @@ if has("win32") || has("win64")
 else
   let $DOTVIM = expand('~/.vim')
 endif
-"-------------------------------------------------------------------------------
-" Vundle
-" $ git clone http://github.com/gmarik/vundle.git ~/.vim/bundle/vundle
-" インストール: .vimrcに追加して、BundleInstall
-" アンインストール: .vimrcから削除して、BundleClean
-filetype off                   " required!
-set rtp+=$DOTVIM/bundle/vundle/
-call vundle#rc('$DOTVIM/bundle/')
-" Vundle
-Bundle 'gmarik/vundle'
-" Syntax highlight
-Bundle 'jquery'
-Bundle 'jelera/vim-javascript-syntax'
-Bundle 'kchmck/vim-coffee-script'
-Bundle 'othree/html5.vim'
-Bundle 'hallison/vim-markdown'
-Bundle 'timcharper/textile.vim'
-Bundle 'groenewege/vim-less'
-Bundle 'wavded/vim-stylus'
-Bundle 'hail2u/vim-css3-syntax'
-Bundle 'digitaltoad/vim-jade'
-Bundle 'dmitry-ilyashevich/vim-typescript'
-" Indent
-Bundle 'jiangmiao/simple-javascript-indenter'
-" Color scheme
+
+"-------------------------------------
+" NeoBundle
+" Plugin Install: git submodule add https://github.com/Shougo/neobundle.vim ~/dotfiles/.vim/bundle/neobundle.vim
+" Plugin 追加: .vimrc に追加して、:NeoBundleInstall
+" Plugin 削除: .vimrc から削除して、:NeoBundleClean
+" Plugin 更新: :NeoBundleUpdate
+filetype plugin indent off
+
+" Required:
+if has('vim_starting')
+  set runtimepath+=~/dotfiles/.vim/bundle/neobundle.vim/
+  call neobundle#rc(expand('~/dotfiles/.vim/bundle/'))
+endif
+
+call neobundle#begin(expand('~/dotfiles/.vim/bundle/'))
+
+" Let NeoBundle manage NeoBundle
+NeoBundleFetch 'Shougo/neobundle.vim'
+
+" My Bundles:
+"" Color scheme
 Bundle "inkpot"
 Bundle 'altercation/vim-colors-solarized'
 Bundle 'hail2u/h2u_colorscheme'
 Bundle 'tomasr/molokai'
-" Plugins
-" Bundle 'YankRing.vim'
+
+"" Syntax
+NeoBundle 'jquery'
+NeoBundle 'jelera/vim-javascript-syntax'
+NeoBundle 'kchmck/vim-coffee-script'
+NeoBundle 'othree/html5.vim'
+NeoBundle 'hallison/vim-markdown'
+NeoBundle 'timcharper/textile.vim'
+NeoBundle 'groenewege/vim-less'
+NeoBundle 'wavded/vim-stylus'
+NeoBundle 'hail2u/vim-css3-syntax'
+NeoBundle 'digitaltoad/vim-jade'
+NeoBundle 'dmitry-ilyashevich/vim-typescript'
+
+"" UI
+NeoBundle 'Shougo/unite.vim'
+NeoBundle 'Shougo/neomru.vim'
+NeoBundle 'Sixeight/unite-grep'
+NeoBundle 'scrooloose/nerdtree'
+NeoBundle 'scrooloose/nerdcommenter'
+NeoBundle 'Shougo/vimfiler'
+NeoBundle 'thinca/vim-qfreplace'
+NeoBundle 'Shougo/vimproc', {
+\ 'build' : {
+\     'windows' : 'make -f make_mingw32.mak',
+\     'cygwin' : 'make -f make_cygwin.mak',
+\     'mac' : 'make -f make_mac.mak',
+\     'unix' : 'make -f make_unix.mak',
+\    },
+\ }
+
+"" Essential
+NeoBundle 'mattn/webapi-vim'
+"" Gist
+NeoBundle 'mattn/gist-vim'
+"" Indent
+NeoBundle 'jiangmiao/simple-javascript-indenter'
+NeoBundle 'nathanaelkane/vim-indent-guides'
+" Zen
+NeoBundle 'mattn/emmet-vim'
 " Lint
-Bundle 'scrooloose/syntastic'
-Bundle 'http://github.com/thinca/vim-poslist.git'
-Bundle 'Shougo/neocomplcache'
-Bundle 'violetyk/neocomplete-php.vim'
-Bundle 'matchit.zip'
-Bundle 'http://github.com/scrooloose/nerdcommenter.git'
-Bundle 'https://github.com/tpope/vim-surround.git'
-Bundle 'Shougo/unite.vim'
-Bundle 'basyura/jslint.vim'
-" Bundle 'rails.vim'
-Bundle 'mattn/emmet-vim'
-Bundle 'scrooloose/nerdtree'
-" Gitを便利に使う
-Bundle 'tpope/vim-fugitive'
-" コメントON/OFFを手軽に実行
-Bundle 'tomtom/tcomment_vim'
-" シングルクオートとダブルクオートの入れ替え等
-Bundle 'tpope/vim-surround'
-" Bundle 'vim-scripts/TabBar'
-" " Viewer
-" Bundle 'http://github.com/thinca/vim-quickrun.git'
-" Bundle 'kannokanno/previm'
-" Bundle 'open-browser.vim'
+NeoBundle 'scrooloose/syntastic'
 
-" インデントに色を付けて見やすくする
-Bundle 'nathanaelkane/vim-indent-guides'
-" インデントに色を付けて見やすくする
+"" Code
+NeoBundle 'Shougo/neocomplete.vim'
+NeoBundle 'Shougo/neosnippet'
+NeoBundle 'Shougo/neosnippet-snippets'
+NeoBundle 'matchit.zip'
+NeoBundle 'http://github.com/thinca/vim-poslist.git'
+"" Replace single and double quote
+NeoBundle 'tpope/vim-surround'
 
-filetype plugin indent on      " required!
+call neobundle#end()
+
+filetype plugin indent on
+
+" 未インストールプラグインが無いかチェック
+"" Reload: :source $HOME/_vimrc
+NeoBundleCheck
+
 "-------------------------------------------------------------------------------
 " カラースキーマ
 syntax enable
 set t_Co=256
-" autocmd ColorScheme * highlight Comment ctermfg=245 guifg=#999999
-" highlight LineNr ctermfg=darkyellow
 autocmd ColorScheme * highlight Comment ctermfg=0
-" 239
 autocmd ColorScheme * highlight LineNr ctermfg=7 ctermbg=239
-
-" hi LineNr ctermfg=white ctermbg=gray
 colorscheme h2u_dark
+
+if !has('gui_running')
+  colorscheme solarized
+  let g:solarized_termcolors=256
+  let g:solarized_termtrans = 1
+  let g:solarized_contrast = 'high'
+  let g:solarized_visibility = 'high'
+endif
 
 "-------------------------------------------------------------------------------
 " ステータスライン
@@ -272,68 +302,6 @@ vmap ,, <Plug>NERDCommenterToggle
 nmap ,9 <Plug>NERDCommenterToEOL
 vmap ,s <Plug>NERDCommenterSexy
 "-------------------------------------------------------------------------------
-" neocomplcache.vim
-let g:neocomplcache_enable_at_startup = 1
-let g:neocomplcache_auto_completion_start_length = 2
-let g:neocomplcache_min_syntax_length = 2
-let g:neocomplcache_min_keyword_length = 2
-let g:neocomplcache_enable_smart_case = 1
-let g:neocomplcache_enable_underbar_completion = 1
-
-" 前回行われた補完をキャンセルします
-inoremap <expr><C-g> neocomplcache#undo_completion()
-" 補完候補のなかから、共通する部分を補完します
-inoremap <expr><C-l> neocomplcache#complete_common_string()
-" 改行で補完ウィンドウを閉じる
-inoremap <expr><CR> neocomplcache#smart_close_popup() . "\<CR>"
-"tabで補完候補の選択を行う
-inoremap <expr><TAB> pumvisible() ? "\<Down>" : "\<TAB>"
-inoremap <expr><S-TAB> pumvisible() ? "\<Up>" : "\<S-TAB>"
-" <C-h>や<BS>を押したときに確実にポップアップを削除します
-inoremap <expr><C-h> neocomplcache#smart_close_popup().”\<C-h>”
-" 現在選択している候補を確定します
-inoremap <expr><C-y> neocomplcache#close_popup()
-" 現在選択している候補をキャンセルし、ポップアップを閉じます
-inoremap <expr><C-e> neocomplcache#cancel_popup()
-
-" neocomplcache phpの設定
-let g:neocomplete_php_locale = 'ja'
-
-" 辞書
-let g:neocomplcache_dictionary_filetype_lists = {
-  \ 'default' : '',
-  \ 'c' : $DOTVIM.'/dict/c-eglibc.dict',
-  \ 'objc' : $DOTVIM.'/dict/objectivec.dict',
-  \ 'ruby' : $DOTVIM.'/dict/ruby.dict',
-  \ 'perl' : $DOTVIM.'/dict/perl.dict',
-  \ 'css' : $DOTVIM.'/dict/css.dict',
-  \ 'javascript' : $DOTVIM.'/dict/javascript.dict',
-  \ 'coffee' : $DOTVIM.'/dict/javascript.dict',
-  \ 'actionscript' : $DOTVIM.'/dict/actionscript.dict'
-  \ }
-
-autocmd FileType php :set dictionary=~/.vim/dict/vim-dict-wordpress/*.dict
-autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
-autocmd FileType coffee setlocal omnifunc=jscomplete#CompleteJS
-autocmd FileType python setlocal omnifunc=pythoncomplete#Complete
-autocmd FileType xml setlocal omnifunc=xmlcomplete#CompleteTags
-autocmd FileType c set omnifunc=ccomplete#Complete
-autocmd FileType cpp set omnifunc=cppcomplete#Complete
-autocmd FileType php set omnifunc=phpcomplete#CompletePHP
-autocmd FileType ruby,eruby setlocal omnifunc=rubycomplete#Complete
-autocmd FileType ruby,eruby let g:rubycomplete_buffer_loading = 1
-autocmd FileType ruby,eruby let g:rubycomplete_classes_in_global = 1
-autocmd FileType ruby,eruby let g:rubycomplete_rails = 1
-
-if !exists('g:neocomplcache_omni_patterns')
-  let g:neocomplcache_omni_patterns = {}
-endif
-
-" let g:neocomplcache_omni_patterns.ruby = '[^. *\t]\.\h\w*\|\h\w*::'
-let g:neocomplcache_omni_patterns.c = '\%(\.\|->\)\h\w*'
-let g:neocomplcache_omni_patterns.cpp = '\h\w*\%(\.\|->\)\h\w*\|\h\w*::'
-let g:neocomplcache_omni_patterns.php = '[^. \t]->\h\w*\|\h\w*::'
-"------------------------------------------------------------------------------
 " ユーティリティ
 " 現在開いているファイルのある場所に常にcdする
 " au BufEnter * exec ":lcd " . expand("%:p:h")
@@ -394,19 +362,23 @@ let g:user_zen_settings = {
 \  'indentation':'  ',
 \}
 
-" Closure Linter
-" autocmd FileType javascript noremap <buffer> <up> :<C-u>!/usr/local/bin/gjslint %<cr>
-" autocmd FileType javascript :compiler gjslint
-" autocmd QuickfixCmdPost make copen
-
 " syntastic
+"" :Errors エラー一覧表示
 let g:syntastic_enable_signs = 1
-let g:syntastic_auto_loc_list = 2
-let g:syntastic_javascript_checker = 'jshint'
-
-" jQuery Syntax
+let g:syntastic_error_symbol = '✗'
+let g:syntastic_warning_symbol = '⚠'
+let g:syntastic_mode_map = { 'mode': 'active',
+  \ 'active_filetypes': [],
+  \ 'passive_filetypes': ['html'] }
+let g:syntastic_javascript_checkers = ['jshint']
+let g:syntastic_coffee_coffeelint_args = '-f ~/.vim/coffeelint.json'
+"" for objective-c
+let g:syntastic_objc_check_header = 1
+let g:syntastic_objc_auto_refresh_includes = 1
+"" for TypeScript
+let g:syntastic_typescript_checkers = ['tslint']
+"" jQuery Syntax
 au BufRead,BufNewFile *.js set ft=javascript syntax=jquery
-
 
 " quickrun
 let g:quickrun_config = {}
