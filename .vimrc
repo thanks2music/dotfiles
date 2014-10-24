@@ -15,7 +15,6 @@ endif
 
 "-------------------------------------
 " NeoBundle
-" Plugin Install: git submodule add https://github.com/Shougo/neobundle.vim ~/dotfiles/.vim/bundle/neobundle.vim
 " Plugin 追加: .vimrc に追加して、:NeoBundleInstall
 " Plugin 削除: .vimrc から削除して、:NeoBundleClean
 " Plugin 更新: :NeoBundleUpdate
