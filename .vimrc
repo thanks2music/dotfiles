@@ -85,6 +85,7 @@ NeoBundle 'Shougo/neosnippet'
 NeoBundle 'Shougo/neosnippet-snippets'
 NeoBundle 'matchit.zip'
 NeoBundle 'http://github.com/thinca/vim-poslist.git'
+NeoBundle 'Townk/vim-autoclose'
 "" Replace single and double quote
 NeoBundle 'tpope/vim-surround'
 
