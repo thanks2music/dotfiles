@@ -103,6 +103,8 @@ syntax enable
 set t_Co=256
 autocmd ColorScheme * highlight LineNr ctermfg=7 ctermbg=239
 autocmd ColorScheme * highlight Comment ctermfg=8
+autocmd ColorScheme * highlight Visual ctermfg=54 ctermbg=129
+
 colorscheme h2u_dark
 
 if !has('gui_running')
