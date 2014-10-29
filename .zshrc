@@ -17,14 +17,14 @@ case ${UID} in
      PROMPT2="%B%{${fg[magenta]}%}%_ #%{${reset_color}%}%b "
      SPROMPT="%B%{${fg[magenta]}%}%r is correct? [n,y,a,e]:%{${reset_color}%}%b "
      [ -n "${REMOTEHOST}${SSH_CONNECTION}" ] &&
-         PROMPT="%{${fg[cyan]}%}$(echo ${HOST%%.*} | tr '[a-z]' '[A-Z]') ${PROMPT}"
+         PROMPT="%{${fg[red]}%}$(echo ${HOST%%.*} | tr '[a-z]' '[A-Z]') ${PROMPT}"
      ;;
  *)
      PROMPT="%{${fg[cyan]}%}%/ %%%{${reset_color}%} "
      PROMPT2="%{${fg[cyan]}%}%_ %%%{${reset_color}%} "
      SPROMPT="%{${fg[cyan]}%}%r is correct? [n,y,a,e]:%{${reset_color}%} "
      [ -n "${REMOTEHOST}${SSH_CONNECTION}" ] &&
-         PROMPT="%{${fg[cyan]}%}$(echo ${HOST%%.*} | tr '[a-z]' '[A-Z]') ${PROMPT}"
+         PROMPT="%{${fg[red]}%}$(echo ${HOST%%.*} | tr '[a-z]' '[A-Z]') ${PROMPT}"
      ;;
 esac
 
@@ -44,7 +44,7 @@ function _update_vcs_info_msg() {
     [[ -n "$vcs_info_msg_0_" ]] && psvar[1]="$vcs_info_msg_0_"
 }
 add-zsh-hook precmd _update_vcs_info_msg
-RPROMPT="%1(v|%F{green}%1v%f|)"
+RPROMPT="%1(v|%F{yellow}%1v%f|)"
 
 # auto change directory
 setopt auto_cd

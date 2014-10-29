@@ -36,6 +36,7 @@ NeoBundle "inkpot"
 NeoBundle 'altercation/vim-colors-solarized'
 NeoBundle 'hail2u/h2u_colorscheme'
 NeoBundle 'tomasr/molokai'
+NeoBundle 'itchyny/landscape.vim'
 
 "" Syntax
 NeoBundle 'jquery'
@@ -57,6 +58,7 @@ NeoBundle 'Sixeight/unite-grep'
 NeoBundle 'scrooloose/nerdtree'
 NeoBundle 'scrooloose/nerdcommenter'
 NeoBundle 'Shougo/vimfiler'
+NeoBundle 'Shougo/vimshell.vim'
 NeoBundle 'thinca/vim-qfreplace'
 NeoBundle 'Shougo/vimproc', {
 \ 'build' : {
@@ -376,7 +378,7 @@ let g:syntastic_objc_auto_refresh_includes = 1
 "" for TypeScript
 let g:syntastic_typescript_checkers = ['tslint']
 "" jQuery Syntax
-" au BufRead,BufNewFile *.js set ft=javascript syntax=jquery
+au BufRead,BufNewFile *.js set ft=javascript syntax=jquery
 
 " quickrun
 let g:quickrun_config = {}
