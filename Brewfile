@@ -46,6 +46,16 @@ install hub
 install peco
 install mercurial
 install nodebrew
+install automake
+install autoconf
+install pcre
+install re2c
+install mhash
+install libtool
+install icu4c
+install gettext
+install gmp
+install libevent
 
 # .dmg
 cask install iterm2
