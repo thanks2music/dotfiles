@@ -45,6 +45,7 @@ install md5sha1sum
 install hub
 install peco
 install mercurial
+install nodebrew
 
 # .dmg
 cask install iterm2
