@@ -8,3 +8,4 @@ ln -sf ~/dotfiles/.gitconfig ~/.gitconfig
 ln -sf ~/dotfiles/.gitignore ~/.gitignore
 ln -sf ~/dotfiles/.tmux.conf ~/.tmux.conf
 ln -sf ~/dotfiles/.jshintrc ~/.jshintrc
+ln -sf ~/dotfiles/.phpbrew ~/.phpbrew

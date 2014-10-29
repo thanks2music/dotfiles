@@ -4,7 +4,7 @@
 # Editer
 *~
 *.swp
-.vim/bundle/*
+.vim/*
 
 # VCS
 tags
@@ -12,6 +12,7 @@ tags
 # Package Manager
 .rvmrc
 .ruby-version
+.phpbrew
 
 # Frontend
 .sass-cache/
