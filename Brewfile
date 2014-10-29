@@ -56,6 +56,7 @@ install icu4c
 install gettext
 install gmp
 install libevent
+install composer
 
 # .dmg
 cask install iterm2
