@@ -4,7 +4,7 @@
 # Editer
 *~
 *.swp
-.vim/*
+.vim/bundle/*
 
 # VCS
 tags

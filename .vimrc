@@ -92,6 +92,7 @@ NeoBundle 'Townk/vim-autoclose'
 "" Operator
 NeoBundle 'kana/vim-operator-user'
 NeoBundle 'rhysd/vim-operator-surround'
+"" Replace Zenkaku Hankaku
 
 call neobundle#end()
 
@@ -424,3 +425,104 @@ let g:gist_post_private = 1
 vmap <silent>sa <Plug>(operator-surround-append)
 vmap <silent>sd <Plug>(operator-surround-delete)
 vmap <silent>sr <Plug>(operator-surround-replace)
+
+"------------------------------------------------------------------------------
+" Neocomplete
+"" TODO neocompleteが動かない...!?
+if neobundle#is_installed('neocomplete')
+  let g:neocomplete#enable_at_startup = 1
+  let g:neocomplete#enable_camel_case_completion = 1
+  let g:neocomplete#enable_underbar_completion = 1
+  let g:neocomplete#enable_smart_case = 1
+  " Set minimum syntax keyword length.
+  let g:neocomplete#sources#syntax#min_keyword_length = 3
+  let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
+
+  " Define dictionary.
+  let g:neocomplete#sources#dictionary#dictionaries = {
+    \ 'default' : '',
+    \ 'vimshell' : $HOME.'/.vimshell_hist',
+    \ 'scheme' : $HOME.'/.gosh_completions',
+    \ 'c' : $DOTVIM.'/dict/c-eglibc.dict',
+    \ 'css' : $DOTVIM.'/dict/css.dict',
+    \ 'scss' : $DOTVIM.'/dict/css.dict',
+    \ 'objc' : $DOTVIM.'/dict/objectivec.dict',
+    \ 'ruby' : $DOTVIM.'/dict/ruby.dict',
+    \ 'perl' : $DOTVIM.'/dict/perl.dict',
+    \ 'php' : $DOTVIM.'/dict/php.dict',
+    \ 'javascript' : $DOTVIM.'/dict/javascript.dict',
+    \ 'coffee' : $DOTVIM.'/dict/javascript.dict',
+    \ 'actionscript' : $DOTVIM.'/dict/actionscript.dict'
+    \ }
+
+  " Define keyword.
+  if !exists('g:neocomplete#keyword_patterns')
+    let g:neocomplete#keyword_patterns = {}
+  endif
+  let g:neocomplete#keyword_patterns['default'] = '\h\w*'
+
+  " Plugin key-mappings.
+  inoremap <expr><C-g> neocomplete#undo_completion()
+  inoremap <expr><C-l> neocomplete#complete_common_string()
+
+  " Recommended key-mappings.
+  " <CR>: close popup and save indent.
+  inoremap <silent> <CR> <C-r>=<SID>my_cr_function()<CR>
+  function! s:my_cr_function()
+    return neocomplete#smart_close_popup() . "\<CR>"
+    " For no inserting <CR> key.
+    "return pumvisible() ? neocomplete#close_popup() : "\<CR>"
+  endfunction
+  " <TAB>: completion.
+  inoremap <expr><TAB>  pumvisible() ? "\<C-n>" :
+        \ <SID>check_back_space() ? "\<TAB>" :
+        \ neocomplete#start_manual_complete()
+  function! s:check_back_space() "{{{
+    let col = col('.') - 1
+    return !col || getline('.')[col - 1]  =~ '\s'
+  endfunction"}}}
+  " dot: completion.
+  " inoremap <expr> . pumvisible() ? neocomplete#smart_close_popup().".\<C-X>\<C-O>\<C-P>" : ".\<C-X>\<C-O>\<C-P>"
+  " <C-h>, <BS>: close popup and delete backword char.
+  inoremap <expr><C-h> neocomplete#smart_close_popup()."\<C-h>"
+  inoremap <expr><BS> neocomplete#smart_close_popup()."\<C-h>"
+  inoremap <expr><C-y> neocomplete#close_popup()
+  inoremap <expr><C-e> neocomplete#cancel_popup()
+  " Close popup by <Space>.
+  inoremap <expr><Space> pumvisible() ? neocomplete#close_popup()."\<Space>" : "\<Space>"
+endif
+
+" Emmet
+"" スニペット定義
+let g:user_emmet_settings = { 
+\    'lang' : 'ja',
+\    'javascript' : { 
+\        'snippets'   : { 
+\            'jq' : "\\$(function() {\n\t${cursor}${child}\n});"
+\        }   
+\    }   
+\}
+
+" Neosnippet
+"" Enable snipMate compatibility feature.
+let g:neosnippet#enable_snipmate_compatibility = 1
+
+"" Tell Neosnippet about the other snippets
+let g:neosnippet#snippets_directory=$DOTVIM.'/snippets'
+
+"" Plugin key-mappings.
+imap <C-k> <Plug>(neosnippet_expand_or_jump)
+smap <C-k> <Plug>(neosnippet_expand_or_jump)
+xmap <C-k> <Plug>(neosnippet_expand_target)
+
+imap <expr><CR> neosnippet#expandable_or_jumpable() ?
+  \ "\<Plug>(neosnippet_expand_or_jump)"
+  \: "\<CR>"
+smap <expr><CR> neosnippet#expandable_or_jumpable() ?
+  \ "\<Plug>(neosnippet_expand_or_jump)"
+  \: "\<CR>"
+
+"" For snippet_complete marker.
+if has('conceal')
+  set conceallevel=2 concealcursor=i
+endif
