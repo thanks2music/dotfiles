@@ -69,7 +69,7 @@ cask install xtrafinder
 cask install appcleaner
 cask install dropbox
 cask install skype
-# cask install virtualbox
+cask install virtualbox
 cask install vagrant
 # cask install simple-comic
 cask install growlnotify
@@ -79,7 +79,7 @@ cask install webp-quicklook
 cask install sequel-pro
 cask install libreoffice
 cask install trailer
-# cask install vlc
+cask install vlc
 cask install tiled
 cask install mplayerx
 cask install steam
