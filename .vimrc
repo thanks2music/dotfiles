@@ -40,7 +40,7 @@ NeoBundle 'itchyny/landscape.vim'
 
 "" Syntax
 NeoBundle 'jquery'
-NeoBundle 'jelera/vim-javascript-syntax'
+NeoBundleLazy 'jelera/vim-javascript-syntax', {'autoload':{'filetypes':['javascript']}}
 NeoBundle 'kchmck/vim-coffee-script'
 NeoBundle 'othree/html5.vim'
 NeoBundle 'hallison/vim-markdown'
@@ -76,11 +76,10 @@ NeoBundle 'mattn/gist-vim'
 "" Indent
 NeoBundle 'jiangmiao/simple-javascript-indenter'
 NeoBundle 'nathanaelkane/vim-indent-guides'
-" Zen
+"" Zen
 NeoBundle 'mattn/emmet-vim'
-" Lint
+"" Lint
 NeoBundle 'scrooloose/syntastic'
-
 "" Code
 NeoBundle 'Shougo/neocomplete.vim'
 NeoBundle 'Shougo/neosnippet'
@@ -89,7 +88,10 @@ NeoBundle 'matchit.zip'
 NeoBundle 'http://github.com/thinca/vim-poslist.git'
 NeoBundle 'Townk/vim-autoclose'
 "" Replace single and double quote
-NeoBundle 'tpope/vim-surround'
+" NeoBundle 'tpope/vim-surround'
+"" Operator
+NeoBundle 'kana/vim-operator-user'
+NeoBundle 'rhysd/vim-operator-surround'
 
 call neobundle#end()
 
@@ -379,7 +381,6 @@ let g:syntastic_objc_auto_refresh_includes = 1
 let g:syntastic_typescript_checkers = ['tslint']
 "" jQuery Syntax
 au BufRead,BufNewFile *.js set ft=javascript syntax=jquery
-
 " quickrun
 let g:quickrun_config = {}
 let g:quickrun_config.markdown = {
@@ -417,3 +418,9 @@ let g:gist_clip_command = 'pbcopy'
 let g:gist_detect_filetype = 1
 let g:gist_open_browser_after_post = 1
 let g:gist_post_private = 1
+
+" Vim Operator Surround
+"" Operator Mapping
+vmap <silent>sa <Plug>(operator-surround-append)
+vmap <silent>sd <Plug>(operator-surround-delete)
+vmap <silent>sr <Plug>(operator-surround-replace)

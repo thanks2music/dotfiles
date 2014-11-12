@@ -251,9 +251,11 @@ fi
 
 ## Editor
 #MacVim
-export EDITOR=/Applications/MacVim.app/Contents/MacOS/Vim
-alias vi='env LANG=ja_JP.UTF-8 /Applications/MacVim.app/Contents/MacOS/Vim "$@"'
-alias vim='env LANG=ja_JP.UTF-8 /Applications/MacVim.app/Contents/MacOS/Vim "$@"'
+export EDITOR=/usr/local/bin/vim
+# alias vi='env LANG=ja_JP.UTF-8 /Applications/MacVim.app/Contents/MacOS/Vim "$@"'
+# alias vim='env LANG=ja_JP.UTF-8 /Applications/MacVim.app/Contents/MacOS/Vim "$@"'
+alias vi='env LANG=ja_JP.UTF-8 /usr/local/bin/vim "$@"'
+
 
 # Add RVM to PATH for scripting
 
@@ -276,3 +278,7 @@ fi
 # Rbenv
 export PATH="$HOME/.rbenv/bin:$PATH"
 eval "$(rbenv init -)"
+
+# for WP-CLI
+export MAMP_PHP=/Applications/MAMP/bin/php/php5.5.10/bin
+export PATH="$MAMP_PHP:$PATH"

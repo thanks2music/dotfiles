@@ -1,5 +1,5 @@
 # Make sure using latest Homebrew
-update
+brew update
 
 # Update already-installed formula (takes too much time, I will do it manually later)
 # upgrade
@@ -9,12 +9,12 @@ update
 
 # Add Repository
 ## homebrew
-tap homebrew/versions
-tap homebrew/binary
+brew tap homebrew/versions
+brew tap homebrew/binary
 
 ## homebrew-cask
-tap caskroom/versions
-tap peco/peco
+brew tap caskroom/versions
+brew tap peco/peco
 
 # Packages
 install caskroom/cask/brew-cask
@@ -57,6 +57,7 @@ install gettext
 install gmp
 install libevent
 install composer
+install wp-cli
 
 # .dmg
 cask install iterm2
@@ -68,9 +69,9 @@ cask install xtrafinder
 cask install appcleaner
 cask install dropbox
 cask install skype
-cask install virtualbox
+# cask install virtualbox
 cask install vagrant
-cask install simple-comic
+# cask install simple-comic
 cask install growlnotify
 cask install quicklook-csv
 cask install quicklook-json
@@ -78,7 +79,7 @@ cask install webp-quicklook
 cask install sequel-pro
 cask install libreoffice
 cask install trailer
-cask install vlc
+# cask install vlc
 cask install tiled
 cask install mplayerx
 cask install steam
