@@ -282,3 +282,7 @@ eval "$(rbenv init -)"
 # for WP-CLI
 export MAMP_PHP=/Applications/MAMP/bin/php/php5.5.10/bin
 export PATH="$MAMP_PHP:$PATH"
+
+# for Work
+export MIRRORZ_PATH=$HOME/work/mirrorz
+export MYBATIS_BIN=/usr/lib/mysql-connector-java-5.1.25-bin.jar
