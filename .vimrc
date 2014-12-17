@@ -76,6 +76,8 @@ NeoBundle 'mattn/gist-vim'
 "" Indent
 NeoBundle 'jiangmiao/simple-javascript-indenter'
 NeoBundle 'nathanaelkane/vim-indent-guides'
+" PHP and HTML Indent
+NeoBundle 'vim-scripts/php.vim-html-enhanced'
 "" Zen
 NeoBundle 'mattn/emmet-vim'
 "" Lint
@@ -514,3 +516,13 @@ smap <expr><CR> neosnippet#expandable_or_jumpable() ?
 if has('conceal')
   set conceallevel=2 concealcursor=i
 endif
+
+" smart indent when entering insert mode with i on empty lines
+function! IndentWithI()
+    if len(getline('.')) == 0
+        return "cc"
+    else
+        return "i"
+    endif
+endfunction
+nnoremap <expr> i IndentWithI()
