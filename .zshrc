@@ -154,6 +154,7 @@ alias lv='lv -c'
 
 #git
 alias g='git'
+alias ga='git add -A'
 alias gg='git grep'
 alias s='git status'
 alias d='git diff'

@@ -84,7 +84,7 @@ NeoBundle 'mattn/emmet-vim'
 NeoBundle 'scrooloose/syntastic'
 "" Code
 " キーバインドが変なので後で直す
-" NeoBundle 'Shougo/neocomplete.vim'
+NeoBundle 'Shougo/neocomplete.vim'
 NeoBundle 'Shougo/neosnippet'
 NeoBundle 'Shougo/neosnippet-snippets'
 NeoBundle 'matchit.zip'
@@ -235,8 +235,19 @@ endif
 "-------------------------------------------------------------------------------
 " キーバインド関係
 " 行単位で移動(1行が長い場合に便利)
-nnoremap j gj
-nnoremap k gk
+noremap j gj
+noremap k gk
+" Shift+hjkl で先頭や末尾とかに移動
+noremap <S-h>   ^
+noremap <S-j>   }
+noremap <S-k>   {
+noremap <S-l>   $
+" ノーマルモードでも改行出来る
+nnoremap <CR> A<CR><ESC>
+" インデント調整
+nnoremap == gg=G''
+" プラグイン周りを簡単に起動
+nnoremap <Space>n  :NERDTree<CR>
 " バッファ周り
 nmap <silent> <C-Right> :bnext<CR>
 nmap <silent> <C-Left> :bprevious<CR>
@@ -429,14 +440,20 @@ map <silent>cs <Plug>(operator-surround-replace)
 
 "------------------------------------------------------------------------------
 " Neocomplete
-" if neobundle#is_installed('neocomplete')
-" let g:neocomplete#enable_ignore_case = 0
-" let g:neocomplete#enable_at_startup = 1
-" let g:neocomplete#enable_camel_case_completion = 1
-" let g:neocomplete#enable_underbar_completion = 1
-" let g:neocomplete#enable_smart_case = 1
-" let g:neocomplete#sources#syntax#min_keyword_length = 3
-" let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
+if neobundle#is_installed('neocomplete')
+  let g:neocomplete#enable_at_startup = 1
+  let g:neocomplete#enable_smart_case = 1
+  " let g:neocomplete#enable_ignore_case = 1
+  let g:neocomplete#enable_camel_case_completion = 1
+  let g:neocomplete#enable_underbar_completion = 1
+  let g:neocomplete#sources#syntax#min_keyword_length = 3
+  let g:neocomplete#keyword_patterns['default'] = '\h\w*'
+  " let g:neocomplete#lock_buffer_name_pattern = '\*ku\*'
+
+  if !exists('g:neocomplete#keyword_patterns')
+    let g:neocomplete#keyword_patterns = {}
+  endif
+endif
 
 " Define dictionary.
 " let g:neocomplete#sources#dictionary#dictionaries = {
