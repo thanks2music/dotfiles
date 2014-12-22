@@ -96,6 +96,8 @@ NeoBundle 'http://github.com/thinca/vim-poslist.git'
 NeoBundle 'kana/vim-operator-user'
 NeoBundle 'rhysd/vim-operator-surround'
 "" Replace Zenkaku Hankaku
+" Docs
+NeoBundle 'rizzatti/dash.vim'
 
 call neobundle#end()
 
