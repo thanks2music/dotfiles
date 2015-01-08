@@ -4,6 +4,10 @@
 # LANG
 export LANG=ja_JP.UTF-8
 
+# 環境変数
+PATH=$HOME/bin:/usr/local/bin:/usr/local/sbin:$PATH
+export MANPATH=/usr/local/share/man:/usr/local/man:/usr/share/man
+
 # OTHERS
 export BUNDLER_EDITOR=emacs
 
@@ -250,12 +254,16 @@ if ! is_screen_or_tmux_running && shell_has_started_interactively; then
     done
 fi
 
-## Editor
-#MacVim
+# Vim
 export EDITOR=/usr/local/bin/vim
-# alias vi='env LANG=ja_JP.UTF-8 /Applications/MacVim.app/Contents/MacOS/Vim "$@"'
-# alias vim='env LANG=ja_JP.UTF-8 /Applications/MacVim.app/Contents/MacOS/Vim "$@"'
 alias vi='env LANG=ja_JP.UTF-8 /usr/local/bin/vim "$@"'
+
+## Kaoriya Vim
+if [ -d $HOME/Applications/MacVim.app ]; then
+  export EDITOR=$HOME/Applications/MacVim.app/Contents/MacOS/Vim
+  alias vim='$EDITOR "$@"'
+  alias gvim='open -a $HOME/Applications/MacVim.app "$@"'
+fi
 
 # Brewfile
 export HOMEBREW_BREWFILE=~/dotfiles/.brewfile

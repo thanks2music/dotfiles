@@ -3,9 +3,71 @@
 ## caskroom/cask
 tap caskroom/cask
 install brew-cask
+
+### Essentials
+cask install iterm2
+cask install macvim-kaoriya
+
+### Browser
+cask install google-chrome
+cask install firefox
 cask install opera
-cask install vagrant
+
+### UI
+cask install karabiner
+cask install bettertouchtool
+cask install xtrafinder
+cask install google-japanese-ime
+cask install clipmenu
+cask install bartender
+cask install istat-menus
+cask install divvy
+cask install free-ruler
+
+### Drive
+cask install appcleaner
+cask install dropbox
+cask install skype
+
+### Development Environment
 cask install virtualbox
+cask install vagrant
+cask install mamp
+cask install sequel-pro
+cask install growlnotify
+cask install quicklook-csv
+cask install quicklook-json
+cask install webp-quicklook
+cask install sublime-text
+cask install imageoptim
+
+### Media
+cask install vlc
+cask install cooviewer
+cask install radiant-player
+cask install gyazo
+cask install soundflower
+cask install handbrake
+cask install maczip4win
+# cask install vlc-remote
+
+### Other
+cask install keyboard-cleaner
+cask install libreoffice
+cask install trailer
+cask install tiled
+cask install steam
+cask install iphone-configuration-utility
+cask install heroku-toolbelt
+cask install licecap
+cask install transmission
+cask install magican
+cask install slack
+cask install sourcetree
+
+### Adobe
+cask install adobe-creative-cloud
+cask install adobe-air
 
 ## caskroom/versions
 tap caskroom/versions
@@ -96,7 +158,6 @@ appstore Day One
 appstore Evernote
 appstore FormatMatch
 appstore Free Video Player
-appstore Install OS X Yosemite
 appstore JPEGmini
 appstore Keynote
 appstore LINE
