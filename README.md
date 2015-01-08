@@ -3,7 +3,7 @@
 Install
 
 1. $ ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
-2. $ brew bundle Brewfile
+2. $ brew file install
 3. $ git clone add https://github.com/thanks2music/dotfiles
 4. $ chmod +x setup.sh
 5. $ ./setup.sh
