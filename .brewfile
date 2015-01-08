@@ -48,6 +48,7 @@ cask install radiant-player
 cask install gyazo
 cask install soundflower
 cask install handbrake
+cask install music-manager
 cask install maczip4win
 # cask install vlc-remote
 
@@ -64,6 +65,7 @@ cask install transmission
 cask install magican
 cask install slack
 cask install sourcetree
+cask install google-hangouts
 
 ### Adobe
 cask install adobe-creative-cloud
