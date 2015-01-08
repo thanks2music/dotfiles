@@ -1,0 +1,119 @@
+# tap repositories and their packages
+
+## caskroom/cask
+tap caskroom/cask
+install brew-cask
+cask install opera
+cask install vagrant
+cask install virtualbox
+
+## caskroom/versions
+tap caskroom/versions
+
+## homebrew/dupes
+tap homebrew/dupes
+install apple-gcc42
+install zlib
+
+## homebrew/php
+tap homebrew/php
+install composer
+install php56
+install wp-cli
+
+## homebrew/versions
+tap homebrew/versions
+install cloog-ppl015
+install gcc46
+install gmp4
+install libmpc08
+install mpfr2
+install ppl011
+
+## rcmdnk/file
+tap rcmdnk/file
+install brew-file
+
+# Other Homebrew packages
+install autoconf
+install automake
+install curl
+install faac
+install ffmpeg
+install freetype
+install gdbm
+install gettext
+install git
+install gmp
+install icu4c
+install jpeg
+install lame
+install libevent
+install libgpg-error
+install libksba
+install libpng
+install libtool
+install libxml2
+install libyaml
+install lua
+install mcrypt
+install mhash
+install mysql
+install openssl
+install pcre
+install pkg-config
+install qt
+install rbenv
+install rbenv-default-gems
+install rbenv-gemset
+install re2c
+install readline
+install reattach-to-user-namespace
+install ruby-build
+install texi2html
+install tig
+install tmux
+install unixodbc
+install vim --with-lua
+install watch
+install wget
+install x264
+install xvid
+install yasm
+install yuicompressor
+install zsh
+install zsh-completions
+
+# App Store applications
+appstore 1Password
+appstore Airmail
+appstore Alfred
+appstore Caffeine
+appstore CLCL Lite
+appstore CloudClip Manager
+appstore Dash
+appstore Day One
+appstore Evernote
+appstore FormatMatch
+appstore Free Video Player
+appstore Install OS X Yosemite
+appstore JPEGmini
+appstore Keynote
+appstore LINE
+appstore MenuPop
+appstore Noizio
+appstore Pocket
+appstore PopClip
+appstore ReadKit
+appstore Scapple
+appstore Skitch
+appstore Slicy
+appstore The Unarchiver
+appstore Transmit
+appstore Tweetbot
+appstore Twitter
+appstore Wunderlist
+appstore Xcode
+
+# Other commands
+cleanup

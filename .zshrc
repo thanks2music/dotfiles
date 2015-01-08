@@ -257,6 +257,9 @@ export EDITOR=/usr/local/bin/vim
 # alias vim='env LANG=ja_JP.UTF-8 /Applications/MacVim.app/Contents/MacOS/Vim "$@"'
 alias vi='env LANG=ja_JP.UTF-8 /usr/local/bin/vim "$@"'
 
+# Brewfile
+export HOMEBREW_BREWFILE=~/dotfiles/.brewfile
+
 
 # Add RVM to PATH for scripting
 
@@ -287,3 +290,5 @@ export PATH="$MAMP_PHP:$PATH"
 # for Work
 export MIRRORZ_PATH=$HOME/work/mirrorz
 export MYBATIS_BIN=/usr/lib/mysql-connector-java-5.1.25-bin.jar
+
+
