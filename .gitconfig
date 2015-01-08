@@ -1,13 +1,13 @@
 [user]
-  name = Yoshiyuki Ito
-  email = thanks2music@gmail.com
+	name = Yoshi Ito
+	email = thanks2music@gmail.com
 [github]
   user = thanks2music
 [credential]
 	helper = osxkeychain
 [core]
   editor = vim
-  excludesfile = ~/.gitignore  # globalな.gitignoreの指定
+	excludesfile = /Users/yoshi/.gitignore
   autocrlf = input             # CRLFを自動変換
 [color]
   branch      = auto
@@ -97,3 +97,9 @@
   generic = G move-last-line
 [push]
 	default = simple
+[difftool "sourcetree"]
+	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+	path = 
+[mergetool "sourcetree"]
+	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+	trustExitCode = true
