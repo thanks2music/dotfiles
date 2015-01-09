@@ -255,12 +255,13 @@ if ! is_screen_or_tmux_running && shell_has_started_interactively; then
 fi
 
 # Vim
-export EDITOR=/usr/local/bin/vim
-alias vi='env LANG=ja_JP.UTF-8 /usr/local/bin/vim "$@"'
+## export EDITOR=/usr/local/bin/vim
+## alias vi='env LANG=ja_JP.UTF-8 /usr/local/bin/vim "$@"'
 
 ## Kaoriya Vim
 if [ -d $HOME/Applications/MacVim.app ]; then
   export EDITOR=$HOME/Applications/MacVim.app/Contents/MacOS/Vim
+  alias vi='$EDITOR "$@"'
   alias vim='$EDITOR "$@"'
   alias gvim='open -a $HOME/Applications/MacVim.app "$@"'
 fi
@@ -295,8 +296,12 @@ eval "$(rbenv init -)"
 export MAMP_PHP=/Applications/MAMP/bin/php/php5.5.10/bin
 export PATH="$MAMP_PHP:$PATH"
 
+export PATH="$(brew --prefix homebrew/php/php56)/bin:$PATH"
+
 # for Work
 export MIRRORZ_PATH=$HOME/work/mirrorz
 export MYBATIS_BIN=/usr/lib/mysql-connector-java-5.1.25-bin.jar
 
 
+### Added by the Heroku Toolbelt
+export PATH="/usr/local/heroku/bin:$PATH"

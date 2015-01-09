@@ -17,7 +17,6 @@ cask install opera
 cask install karabiner
 cask install bettertouchtool
 cask install xtrafinder
-cask install google-japanese-ime
 cask install clipmenu
 cask install bartender
 cask install istat-menus
@@ -37,7 +36,6 @@ cask install sequel-pro
 cask install growlnotify
 cask install quicklook-csv
 cask install quicklook-json
-cask install webp-quicklook
 cask install sublime-text
 cask install imageoptim
 
@@ -59,7 +57,6 @@ cask install libreoffice
 cask install trailer
 cask install tiled
 cask install steam
-cask install iphone-configuration-utility
 cask install heroku-toolbelt
 cask install licecap
 cask install transmission
@@ -82,14 +79,14 @@ install zlib
 
 ## homebrew/php
 tap homebrew/php
-install composer
 install php56
+install composer
 install wp-cli
 
 ## homebrew/versions
 tap homebrew/versions
 install cloog-ppl015
-install gcc46
+install gcc49
 install gmp4
 install libmpc08
 install mpfr2
@@ -139,7 +136,7 @@ install texi2html
 install tig
 install tmux
 install unixodbc
-install vim --with-lua
+# install vim --with-lua
 install watch
 install wget
 install x264
