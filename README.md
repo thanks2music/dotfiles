@@ -19,4 +19,3 @@ Install
 2. $ chmod +x phpbrew
 3. $ sudo mv phpbrew /usr/bin/phpbrew
 4. $ phpbrew lookup-prefix homebrew
-
