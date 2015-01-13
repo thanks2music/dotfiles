@@ -37,6 +37,7 @@ NeoBundle 'altercation/vim-colors-solarized'
 NeoBundle 'hail2u/h2u_colorscheme'
 NeoBundle 'tomasr/molokai'
 NeoBundle 'itchyny/landscape.vim'
+NeoBundle 'jaromero/vim-monokai-refined'
 
 "" Syntax
 NeoBundle 'jquery'
@@ -76,6 +77,7 @@ NeoBundle 'mattn/gist-vim'
 "" Indent
 NeoBundle 'jiangmiao/simple-javascript-indenter'
 NeoBundle 'nathanaelkane/vim-indent-guides'
+
 " PHP and HTML Indent
 NeoBundle 'vim-scripts/php.vim-html-enhanced'
 "" Zen
@@ -111,18 +113,30 @@ NeoBundleCheck
 " カラースキーマ
 syntax enable
 set t_Co=256
-autocmd ColorScheme * highlight LineNr ctermfg=7 ctermbg=239
-autocmd ColorScheme * highlight Comment ctermfg=8
-autocmd ColorScheme * highlight Visual ctermfg=54 ctermbg=129
+set ts=2 sw =2 et
+"" Vim indent Guide
+let g:indent_guides_auto_colors = 0
+" let g:indent_guides_enable_on_vim_startup = 1
+" let g:indent_guides_start_level = 2
+let g:indent_guides_guide_size = 0
+autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd  guibg=gray   ctermbg=236
+autocmd VimEnter,Colorscheme * :hi IndentGuidesEven guibg=black ctermbg=240
 
-colorscheme h2u_dark
+"" Molokai
+" let g:molokai_original = 1
+" colorscheme molokai
 
-if !has('gui_running')
-  let g:solarized_termcolors=256
-  let g:solarized_termtrans = 1
-  let g:solarized_contrast = 'high'
-  let g:solarized_visibility = 'high'
-endif
+"" h2u
+" autocmd ColorScheme * highlight LineNr ctermfg=7 ctermbg=139
+" autocmd ColorScheme * highlight Visual ctermfg=7 ctermbg=139
+
+
+" if !has('gui_running')
+"   let g:solarized_termcolors=256
+"   let g:solarized_termtrans = 1
+"   let g:solarized_contrast = 'high'
+"   let g:solarized_visibility = 'high'
+" endif
 
 "-------------------------------------------------------------------------------
 " ステータスライン
