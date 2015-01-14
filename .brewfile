@@ -6,7 +6,9 @@ install brew-cask
 
 ### Essentials
 cask install iterm2
-cask install macvim-kaoriya
+# Luaが入らない
+## cask install macvim-kaoriya
+install vim --with-lua
 
 ### Browser
 cask install google-chrome
@@ -136,7 +138,6 @@ install texi2html
 install tig
 install tmux
 install unixodbc
-# install vim --with-lua
 install watch
 install wget
 install x264
