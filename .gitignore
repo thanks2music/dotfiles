@@ -17,7 +17,7 @@ tags
 # Frontend
 .sass-cache/
 *Guardfile
-*Gemfile
+# *Gemfile
 *Gemfile.lock
 
 # Node
