@@ -79,7 +79,7 @@ NeoBundle 'jiangmiao/simple-javascript-indenter'
 NeoBundle 'nathanaelkane/vim-indent-guides'
 
 " PHP and HTML Indent
-NeoBundle 'vim-scripts/php.vim-html-enhanced'
+" NeoBundle 'vim-scripts/php.vim-html-enhanced'
 "" Zen
 NeoBundle 'mattn/emmet-vim'
 "" Lint
@@ -113,18 +113,10 @@ NeoBundleCheck
 " カラースキーマ
 syntax enable
 set t_Co=256
-set ts=2 sw =2 et
-"" Vim indent Guide
-let g:indent_guides_auto_colors = 0
-" let g:indent_guides_enable_on_vim_startup = 1
-" let g:indent_guides_start_level = 2
-let g:indent_guides_guide_size = 0
-autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd  guibg=gray   ctermbg=236
-autocmd VimEnter,Colorscheme * :hi IndentGuidesEven guibg=black ctermbg=240
 
 "" Molokai
 " let g:molokai_original = 1
-" colorscheme molokai
+colorscheme molokai
 
 "" h2u
 " autocmd ColorScheme * highlight LineNr ctermfg=7 ctermbg=139
@@ -204,6 +196,13 @@ set expandtab
 set tabstop=2
 set shiftwidth=2
 set softtabstop=2
+"" Vim indent Guide
+"let g:indent_guides_auto_colors = 0
+let g:indent_guides_auto_colors = 0
+let g:indent_guides_start_level = 2
+let g:indent_guides_guide_size = 2
+autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd  guibg=gray   ctermbg=236
+autocmd VimEnter,Colorscheme * :hi IndentGuidesEven guibg=black ctermbg=240
 " JavaScript Indenter
 "-------------------------------------------------------------------------------
 " 補完・履歴
@@ -400,6 +399,10 @@ let g:syntastic_mode_map = { 'mode': 'active',
   \ 'passive_filetypes': ['html'] }
 let g:syntastic_javascript_checkers = ['jshint']
 let g:syntastic_coffee_coffeelint_args = '-f ~/.vim/coffeelint.json'
+"" php
+let g:syntastic_php_checkers = ['php', 'phpcs', 'phpmd']
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_check_on_wq = 0
 "" for objective-c
 let g:syntastic_objc_check_header = 1
 let g:syntastic_objc_auto_refresh_includes = 1
