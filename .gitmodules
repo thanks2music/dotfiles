@@ -1,3 +1,3 @@
-[submodule "iTerm2-Color-Schemes"]
-	path = iTerm2-Color-Schemes
+[submodule "colors"]
+	path = colors
 	url = git@github.com:mbadolato/iTerm2-Color-Schemes.git
