@@ -292,8 +292,8 @@ eval "$(rbenv init -)"
 # for WP-CLI
 # 標準で5.6.2になってた
 ## export MAMP_PHP=/Applications/MAMP/bin/php/php5.6.2/bin
-## export WP_CLI_PHP=/Applications/MAMP/bin/php/php5.6.2/bin/php
-## export PATH="$MAMP_PHP:$PATH"
+export WP_CLI_PHP=/Applications/MAMP/bin/php/php5.6.2/bin/php
+export PATH="$MAMP_PHP:$PATH"
 
 # homebrew-php
 export PATH="$(brew --prefix homebrew/php/php56)/bin:$PATH"
