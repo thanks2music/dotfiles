@@ -50,6 +50,9 @@ function _update_vcs_info_msg() {
 add-zsh-hook precmd _update_vcs_info_msg
 RPROMPT="%1(v|%F{yellow}%1v%f|)"
 
+# git stash count
+# http://qiita.com/Cside_/items/13f85c11d3d0aa35d7ef
+
 # auto change directory
 setopt auto_cd
 
@@ -160,7 +163,7 @@ alias lv='lv -c'
 alias g='git'
 alias ga='git add -A'
 alias gg='git grep'
-alias s='git status'
+alias s='git status -s'
 alias d='git diff'
 alias gm= 'git co master'
 alias gi='git'
@@ -179,14 +182,6 @@ alias sw='sass --watch scss:css'
 
 #guard
 alias mg='bundle exec guard -g ui'
-
-# for works
-alias gridir='cd ~/work/griffon-web/themes/'
-alias boddir='cd ~/work/bod-web/themes/bod-web/'
-alias aoddir='cd ~/work/aodweb/themes/'
-alias lowdir='cd ~/work/lokcbweb/themes/'
-alias dddir='cd ~/Dropbox/dev/'
-alias ddir='cd ~/dev/'
 
 # returnでlsとgit statusを表示
 function do_enter() {
@@ -216,8 +211,6 @@ function chpwd() { ls -1 }
 function title {
   echo -ne "\033]0;"$*"\007"
 }
-
-# tmuxのクリップボード https://github.com/ChrisJohnsen/tmux-MacOSX-pasteboard
 
 # tmux auto start
 # http://d.hatena.ne.jp/tyru/20100828/run_tmux_or_screen_at_shell_startup
@@ -253,6 +246,8 @@ if ! is_screen_or_tmux_running && shell_has_started_interactively; then
         fi
     done
 fi
+
+# git branch / stash 表示
 
 # Vim
 ## export EDITOR=/usr/local/bin/vim
