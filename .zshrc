@@ -150,7 +150,9 @@ alias su="su -l"
 alias sl="sl -ae"
 
 alias r="rails"
-function dbox() { emacs ~/Dropbox/memos/${1}& }
+
+# zsh
+alias reload='source ~/.zshrc && exec $SHELL'
 
 # vi
 alias v='vi'
