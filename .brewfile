@@ -88,7 +88,7 @@ install wp-cli
 ## homebrew/versions
 tap homebrew/versions
 install cloog-ppl015
-install gcc49
+install gcc
 install gmp4
 install libmpc08
 install mpfr2
