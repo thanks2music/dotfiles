@@ -32,7 +32,6 @@ NeoBundleFetch 'Shougo/neobundle.vim'
 
 " My Bundles:
 "" Color scheme
-NeoBundle "inkpot"
 NeoBundle 'altercation/vim-colors-solarized'
 NeoBundle 'hail2u/h2u_colorscheme'
 NeoBundle 'tomasr/molokai'
@@ -51,6 +50,8 @@ NeoBundle 'wavded/vim-stylus'
 NeoBundle 'hail2u/vim-css3-syntax'
 NeoBundle 'digitaltoad/vim-jade'
 NeoBundle 'dmitry-ilyashevich/vim-typescript'
+NeoBundle 'JulesWang/css.vim'
+NeoBundle 'cakebaker/scss-syntax.vim'
 
 "" UI
 NeoBundle 'Shougo/unite.vim'
@@ -86,7 +87,7 @@ NeoBundle 'mattn/emmet-vim'
 NeoBundle 'scrooloose/syntastic'
 "" Code
 " キーバインドが変なので後で直す
-NeoBundle 'Shougo/neocomplete.vim'
+"" NeoBundle 'Shougo/neocomplete.vim'
 NeoBundle 'Shougo/neosnippet'
 NeoBundle 'Shougo/neosnippet-snippets'
 NeoBundle 'matchit.zip'

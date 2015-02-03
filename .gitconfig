@@ -7,7 +7,7 @@
 	helper = osxkeychain
 [core]
   editor = vim
-	excludesfile = /Users/yoshi/.gitignore
+	excludesfile = ~/.gitignore
   autocrlf = input             # CRLFを自動変換
 [color]
   branch      = auto
