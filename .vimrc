@@ -1,4 +1,5 @@
 "-------------------------------------
+"
 " That's so Vim!
 set nocompatible
 "-------------------------------------
@@ -37,6 +38,8 @@ NeoBundle 'hail2u/h2u_colorscheme'
 NeoBundle 'tomasr/molokai'
 NeoBundle 'itchyny/landscape.vim'
 NeoBundle 'jaromero/vim-monokai-refined'
+NeoBundle 'jpo/vim-railscasts-theme'
+NeoBundle 'w0ng/vim-hybrid'
 
 "" Syntax
 NeoBundle 'jquery'
@@ -117,7 +120,9 @@ set t_Co=256
 
 "" Molokai
 " let g:molokai_original = 1
-colorscheme molokai
+" colorscheme railscasts
+" let g:hybrid_use_iTerm_colors = 1
+colorscheme hybrid
 
 "" h2u
 " autocmd ColorScheme * highlight LineNr ctermfg=7 ctermbg=139
@@ -160,7 +165,8 @@ set number          " 行番号表示
 set numberwidth=4   " 行番号の幅
 set ruler           " ルーラーの表示
 set list            " 不可視文字表示
-set listchars=tab:>.,trail:_,extends:>,precedes:<   " 不可視文字の表示形式
+" 不可視文字の表示形式
+set listchars=tab:»-,trail:▸,eol:↵,extends:»,precedes:«,nbsp:%
 set display=uhex    " 印字不可能文字を16進数で表示
 " 全角スペースをハイライト
 if has("syntax")
