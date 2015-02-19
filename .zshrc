@@ -149,7 +149,11 @@ alias df="df -h"
 alias su="su -l"
 alias sl="sl -ae"
 
+# Rails
 alias r="rails"
+
+# Middleman
+alias m="middleman"
 
 # zsh
 alias reload='source ~/.zshrc && exec $SHELL'
@@ -184,6 +188,14 @@ alias sw='sass --watch scss:css'
 
 #guard
 alias mg='bundle exec guard -g ui'
+
+# PostgreSQL
+alias pss='pg_ctl -l /usr/local/var/postgres/server.log start'
+alias psd='pg_ctl stop -s -m fast'
+
+# MySQL
+## for MAMP
+alias mampsql='cd /Applications/MAMP/Library/bin && mysql mysql -u root -p'
 
 # returnでlsとgit statusを表示
 function do_enter() {
@@ -289,9 +301,10 @@ fi
 export PATH="$HOME/.rbenv/bin:$PATH"
 eval "$(rbenv init -)"
 
+# MAMPのpath通してコマンドラインで操作
+export PATH=$PATH:/Applications/MAMP/Library/bin
+
 # for WP-CLI
-# 標準で5.6.2になってた
-## export MAMP_PHP=/Applications/MAMP/bin/php/php5.6.2/bin
 export WP_CLI_PHP=/Applications/MAMP/bin/php/php5.6.2/bin/php
 export PATH="$MAMP_PHP:$PATH"
 
@@ -302,6 +315,8 @@ export PATH="$(brew --prefix homebrew/php/php56)/bin:$PATH"
 export MIRRORZ_PATH=$HOME/work/mirrorz
 export MYBATIS_BIN=/usr/lib/mysql-connector-java-5.1.25-bin.jar
 
+# PostgreSQL
+export PGDATA=/usr/local/var/postgres
 
 ### Added by the Heroku Toolbelt
 export PATH="/usr/local/heroku/bin:$PATH"
