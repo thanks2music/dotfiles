@@ -147,6 +147,10 @@ install yasm
 install yuicompressor
 install zsh
 install zsh-completions
+install gist
+install chromedriver
+install gzip
+install postgresql
 
 # App Store applications
 appstore 1Password
