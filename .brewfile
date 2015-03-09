@@ -153,34 +153,26 @@ install gzip
 install postgresql
 
 # App Store applications
-appstore 1Password
-appstore Airmail
-appstore Alfred
-appstore Caffeine
-appstore CLCL Lite
-appstore CloudClip Manager
-appstore Dash
-appstore Day One
-appstore Evernote
-appstore FormatMatch
-appstore Free Video Player
-appstore JPEGmini
-appstore Keynote
-appstore LINE
-appstore MenuPop
-appstore Noizio
-appstore Pocket
-appstore PopClip
-appstore ReadKit
-appstore Scapple
-appstore Skitch
-appstore Slicy
-appstore The Unarchiver
-appstore Transmit
-appstore Tweetbot
-appstore Twitter
-appstore Wunderlist
-appstore Xcode
+# appstore 1Password
+# appstore Alfred
+# appstore Caffeine
+# appstore CLCL Lite
+# appstore Dash
+# appstore Day One
+# appstore Evernote
+# appstore JPEGmini
+# appstore Keynote
+# appstore LINE
+# appstore Noizio
+# appstore Pocket
+# appstore PopClip
+# appstore Skitch
+# appstore Slicy
+# appstore The Unarchiver
+# appstore Transmit
+# appstore Twitter
+# appstore Wunderlist
+# appstore Xcode
 
 # Other commands
 cleanup
