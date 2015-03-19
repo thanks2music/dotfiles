@@ -23,3 +23,6 @@ tags
 # Node
 *npm-debug.log
 *node_modules
+
+# Temp
+~/dotfiles/docset/

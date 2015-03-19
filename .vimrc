@@ -298,6 +298,13 @@ map <C-L> <C-W>l
 map <C-TAB> <C-W>w
 " Explore
 "nmap <silent> <C-e> :Explore<CR>
+
+" 縦に連番を入力
+nnoremap <silent> co :ContinuousNumber <C-a><CR>
+vnoremap <silent> co :ContinuousNumber <C-a><CR>
+command! -count -nargs=1 ContinuousNumber let snf=&nf|set nf-=octal|let cl = col('.')|for nc in range(1, <count>?<count>-line('.'):1)|exe 'normal! j' . nc . <q-args>|call cursor('.', cl)|endfor|unlet cl|unlet snf
+" 0を8進数除外
+set nrformats-=octal
 "-------------------------------------------------------------------------------
 " ユーザ定義コマンド
 command! Vsp :set columns=176|vsp
