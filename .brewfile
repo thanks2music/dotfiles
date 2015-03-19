@@ -11,8 +11,6 @@ cask install iterm2
 install vim --with-lua
 
 ### Browser
-# 1Password が動かなかった
-## cask install google-chrome
 cask install firefox
 cask install opera
 
@@ -52,7 +50,7 @@ cask install handbrake
 cask install music-manager
 cask install maczip4win
 cask install xld
-# cask install vlc-remote
+cask install lastfm
 
 ### Other
 cask install keyboard-cleaner
