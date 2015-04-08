@@ -101,6 +101,11 @@ NeoBundle 'http://github.com/thinca/vim-poslist.git'
 "" Operator
 NeoBundle 'kana/vim-operator-user'
 NeoBundle 'rhysd/vim-operator-surround'
+" 進数設定
+set nrformats-=octal
+" NeoBundle 'tkhren/vim-textobj-numeral'
+"" 連番入力
+NeoBundle 'deris/vim-rengbang'
 "" Replace Zenkaku Hankaku
 " Docs
 NeoBundle 'rizzatti/dash.vim'
@@ -298,13 +303,26 @@ map <C-L> <C-W>l
 map <C-TAB> <C-W>w
 " Explore
 "nmap <silent> <C-e> :Explore<CR>
+" 連番のインクリメントとデクリメント
+function! Increment(step)
+    let inc_key = a:step > 0 ? '^A' : '^X'
+    let @z = '"zyadjvad"zp'. abs(a:step) . inc_key
+    return '@z'
+endfunction
 
-" 縦に連番を入力
-nnoremap <silent> co :ContinuousNumber <C-a><CR>
-vnoremap <silent> co :ContinuousNumber <C-a><CR>
-command! -count -nargs=1 ContinuousNumber let snf=&nf|set nf-=octal|let cl = col('.')|for nc in range(1, <count>?<count>-line('.'):1)|exe 'normal! j' . nc . <q-args>|call cursor('.', cl)|endfor|unlet cl|unlet snf
-" 0を8進数除外
-set nrformats-=octal
+function! SequentialIncrement(motion, textobj, step)
+    let inc_key = a:step > 0 ? "\<C-a>" : "\<C-x>"
+    let @z = '"zy' . a:textobj . a:motion . 'v' .
+    \ a:textobj . '"zp' . abs(a:step) . inc_key
+    return '@z'
+endfunction
+
+"" 縦方向のインクリメント
+nmap <expr> + SequentialIncrement('j', 'ad', 1)
+"" デクリメント
+nmap <expr> - Increment(-1)
+"" 横方向の連番
+nmap <expr> ) SequentialIncrement('gNd', 'ad', 1)
 "-------------------------------------------------------------------------------
 " ユーザ定義コマンド
 command! Vsp :set columns=176|vsp
