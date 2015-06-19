@@ -58,8 +58,8 @@ cask install libreoffice
 cask install trailer
 cask install tiled
 cask install steam
-cask install heroku-toolbelt
-cask install licecap
+# cask install heroku-toolbelt
+# cask install licecap
 cask install transmission
 cask install magican
 cask install slack

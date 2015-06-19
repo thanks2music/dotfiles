@@ -2,13 +2,13 @@
 if has("win32") || has("win64")
   set guifont=VL_Gothic:h13
 elseif has("macunix")
-  set guifont=Osaka−等幅:h16
+  set guifont=源ノ角ゴシック\ Code\ JP\ Light:h13
 else
   set guifont=VL\ ゴシック\ 12
 endif
 
 " 色テーマ
-colorscheme darkblue " (GUI使用時)
+colorscheme hybrid " (GUI使用時)
 
 " Windows用キーマップを有効にする
 "source $VIMRUNTIME/mswin.vim

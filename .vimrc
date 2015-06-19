@@ -79,7 +79,8 @@ NeoBundle 'mattn/webapi-vim'
 "" Gist
 NeoBundle 'mattn/gist-vim'
 "" Indent
-NeoBundle 'jiangmiao/simple-javascript-indenter'
+" NeoBundle 'jiangmiao/simple-javascript-indenter'
+NeoBundle 'JavaScript-Indent'
 NeoBundle 'nathanaelkane/vim-indent-guides'
 
 " PHP and HTML Indent
