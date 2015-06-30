@@ -16,6 +16,7 @@ tags
 # Frontend
 .sass-cache/
 *Guardfile
+
 # *Gemfile
 *Gemfile.lock
 .ruby-version
@@ -23,6 +24,9 @@ tags
 # Node
 *npm-debug.log
 *node_modules
+
+# Composer
+*composer.phar
 
 # Temp
 ~/dotfiles/docset/
