@@ -173,6 +173,7 @@ alias s='git status -s'
 alias d='git diff'
 alias gm= 'git co master'
 alias gi='git'
+alias gp='git pull --rebase'
 
 #tmux
 alias t='tmux'
