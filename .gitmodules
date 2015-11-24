@@ -4,3 +4,9 @@
 [submodule "docset/phpdoc-ja-docset"]
 	path = docset/phpdoc-ja-docset
 	url = git@github.com:miukoba/phpdoc-ja-docset.git
+[submodule "Dash-Docset-JavaScript-ja"]
+	path = Dash-Docset-JavaScript-ja
+	url = git@github.com:zchee/Dash-Docset-JavaScript-ja.git
+[submodule "docset/Dash-Docset-JavaScript-ja"]
+	path = docset/Dash-Docset-JavaScript-ja
+	url = git@github.com:zchee/Dash-Docset-JavaScript-ja.git

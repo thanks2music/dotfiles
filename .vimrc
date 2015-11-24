@@ -95,7 +95,7 @@ NeoBundle 'scrooloose/syntastic'
 NeoBundle 'Shougo/neosnippet'
 NeoBundle 'Shougo/neosnippet-snippets'
 NeoBundle 'matchit.zip'
-NeoBundle 'http://github.com/thinca/vim-poslist.git'
+NeoBundle 'https://github.com/thinca/vim-poslist.git'
 " NeoBundle 'Townk/vim-autoclose'
 "" Replace single and double quote
 " NeoBundle 'tpope/vim-surround'
@@ -352,11 +352,16 @@ function! s:Exec()
 :endfunction
 command! Exec call <SID>Exec()
 map <silent> <C-F9> :call <SID>Exec()<CR>
+
+" diffのキーバインドを変更
+command! -nargs=1 -complete=file D vertical diffsplit <args>
+
 " Python実行
 if has('python')
   python import vim
   command Py python exec('\n'.join(vim.current.buffer))
 endif
+
 "-------------------------------------------------------------------------------
 " matchit.vim
 " % で対応するフレーズに移動
@@ -409,7 +414,7 @@ nnoremap <silent> ,um :<C-u>Unite file_mru<CR>
 " 再帰的ファイル一覧
 nnoremap <silent> ,uu :<C-u>Unite file_rec/async<CR>
 " grep
-nnoremap ,ug :Unite grep::-iHRn<CR>/*
+" nnoremap ,ug :Unite grep::-iHRn<CR>/*
 
 " ウィンドウを分割して開く
 au FileType unite nnoremap <silent> <buffer> <expr> <C-j> unite#do_action('split')
@@ -421,27 +426,40 @@ au FileType unite inoremap <silent> <buffer> <expr> <C-l> unite#do_action('vspli
 au FileType unite nnoremap <silent> <buffer> <ESC><ESC> q
 au FileType unite inoremap <silent> <buffer> <ESC><ESC> <ESC>q
 
+" unite grep に ag(The Silver Searcher) を使う
+if executable('ag')
+  let g:unite_source_grep_command = 'ag'
+  let g:unite_source_grep_default_opts = '--nogroup --nocolor --column'
+  let g:unite_source_grep_recursive_opt = ''
+endif
+
 "-------------------------------------------------------------------------------
 " syntastic
 "" :Errors エラー一覧表示
-let g:syntastic_enable_signs = 1
+"" Recommended Setting
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+" 1 = true, 0 = false
+let g:syntastic_always_populate_loc_list = 1
+" :spでエラーを表示させるかどうか
+let g:syntastic_auto_loc_list = 0
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 1
+"" Custom Setting
 let g:syntastic_error_symbol = '✗'
 let g:syntastic_warning_symbol = '⚠'
 let g:syntastic_mode_map = { 'mode': 'active',
   \ 'active_filetypes': [],
   \ 'passive_filetypes': ['html'] }
+
+" let g:syntastic_coffee_coffeelint_args = '-f ~/.vim/coffeelint.json'
+" JavaScript
 let g:syntastic_javascript_checkers = ['jshint']
-let g:syntastic_coffee_coffeelint_args = '-f ~/.vim/coffeelint.json'
 "" php
 let g:syntastic_php_checkers = ['php', 'phpcs', 'phpmd']
-let g:syntastic_always_populate_loc_list = 1
-let g:syntastic_check_on_wq = 0
-"" for objective-c
-let g:syntastic_objc_check_header = 1
-let g:syntastic_objc_auto_refresh_includes = 1
-"" for TypeScript
-let g:syntastic_typescript_checkers = ['tslint']
-"" jQuery Syntax
+
+" jQuery Syntax
 au BufRead,BufNewFile *.js set ft=javascript syntax=jquery
 " quickrun
 let g:quickrun_config = {}
@@ -557,7 +575,10 @@ let g:user_emmet_settings = {
 \  'lang' : 'ja',
 \  'javascript' : {
 \    'snippets'   : {
-\        'jq' : "\\$(function() {\n\t${cursor}${child}\n});"
+\        'jq'   : "\\$(function() {\n\t${cursor}${child}\n});",
+\        'cl'   : "console\.log\(\)\;",
+\        'fun'  : "function ${cursor}\(\) \{\n\}",
+\        'vfun' : "var ${cursor} = function\(\) \{\n\}\;",
 \    }
 \  }
 \}
@@ -595,3 +616,4 @@ function! IndentWithI()
     endif
 endfunction
 nnoremap <expr> i IndentWithI()
+
