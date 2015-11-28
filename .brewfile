@@ -5,12 +5,17 @@ tap caskroom/cask
 install brew-cask
 
 ### Essentials
+cask install zsh
 cask install iterm2
 # Luaが入らない
 ## cask install macvim-kaoriya
-install vim --with-lua
+cask install vim --with-lua
+install tmux
+install reattach-to-user-namespace
+
 
 ### Browser
+cask install google-chrome
 cask install firefox
 cask install opera
 
@@ -65,6 +70,7 @@ cask install magican
 cask install slack
 cask install sourcetree
 cask install google-hangouts
+cask install cooviewer
 
 ### Adobe
 cask install adobe-creative-cloud

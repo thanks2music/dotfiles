@@ -3,10 +3,11 @@
 Install
 
 1. $ ruby -e "$(curl -fsSL https://raw.github.com/Homebrew/homebrew/go/install)"
-2. $ brew file install
-3. $ git clone https://github.com/thanks2music/dotfiles
-4. $ chmod +x setup.sh
-5. $ ./setup.sh
+2. $ git clone https://github.com/thanks2music/dotfiles
+3. brew install brew-file
+4. $ brew file install
+5. $ chmod +x setup.sh
+6. $ ./setup.sh
 
 ## Vim plugin
 
