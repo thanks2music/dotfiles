@@ -313,8 +313,10 @@ export PATH="$MAMP_PHP:$PATH"
 export PATH="$(brew --prefix homebrew/php/php56)/bin:$PATH"
 
 # for Work
-export MIRRORZ_PATH=$HOME/work/mirrorz
-export MYBATIS_BIN=/usr/lib/mysql-connector-java-5.1.25-bin.jar
+export MIRRORZ_PATH=$HOME/work/mirrorz/admin/mirrorz
+export JAVA_HOME=`/usr/libexec/java_home`
+export CLASSPATH_PREFIX=$HOME/work/mirrorz/app/mirrorz_db_migrations/drivers/mysql-connector-java-5.1.25-bin.jar
+# export MYBATIS_BIN=/usr/lib/mysql-connector-java-5.1.25-bin.jar
 
 # PostgreSQL
 export PGDATA=/usr/local/var/postgres
