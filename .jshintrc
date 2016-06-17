@@ -16,6 +16,9 @@
     "$": false,
     "jQuery": false,
     "TimelineLite": false,
+    "TweenMax": false,
+    "TimelineMax": false,
+    "_": false,
     "ga": false
   }
 }

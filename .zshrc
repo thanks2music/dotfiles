@@ -152,6 +152,9 @@ alias sl="sl -ae"
 # Rails
 alias r="rails"
 
+# Node.js
+alias nb="nodebrew"
+
 # Middleman
 alias m="middleman"
 
@@ -174,6 +177,7 @@ alias d='git diff'
 alias gm= 'git co master'
 alias gi='git'
 alias gp='git pull --rebase'
+alias gitrc='vi ~/.gitconfig'
 
 #tmux
 alias t='tmux'
@@ -189,6 +193,9 @@ alias sw='sass --watch scss:css'
 
 #guard
 alias mg='bundle exec guard -g ui'
+
+# Composer
+alias composerupdate='/usr/local/Cellar/composer/1.0.0-alpha9/libexec/composer.phar self-update'
 
 # PostgreSQL
 alias pss='pg_ctl -l /usr/local/var/postgres/server.log start'

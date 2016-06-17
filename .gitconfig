@@ -1,13 +1,13 @@
 [user]
-	name = Yoshiyuki Ito
-	email = thanks2music@gmail.com
+  name = Yoshiyuki Ito
+  email = thanks2music@gmail.com
 [github]
   user = thanks2music
 [credential]
-	helper = osxkeychain
+  helper = osxkeychain
 [core]
   editor = vim
-	excludesfile = ~/.gitignore
+  excludesfile = ~/.gitignore
   autocrlf = input             # CRLFを自動変換
 [color]
   branch      = auto
@@ -33,6 +33,7 @@
   ba = branch -a           # originも含めた全てのbranchを表示
   bm = branch --merged     # merge済みのbranchを表示
   bn = branch --no-merged  # mergeしてないbranchを表示
+  rup = remote prune origin # リモートの状態を再度取得
   current-branch = "!sh -c \"git branch | grep '*' | awk '{ print \\$2 }' \""
   p4r = "!sh -c 'git push origin HEAD:refs/for/master/`git current-branch`'"
   # log関連
@@ -91,7 +92,8 @@
   gn = grep -n
   # ranking
   ranking = shortlog -s -n --no-merges
-
+[http]
+  postBuffer = 524288000
 [tig "bind"]
   generic = g move-first-line
   generic = G move-last-line
@@ -103,3 +105,7 @@
 [mergetool "sourcetree"]
 	cmd = /opt/homebrew-cask/Caskroom/sourcetree/2.0.4/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
 	trustExitCode = true
+[merge]
+	ff = false
+[pull]
+	ff = only
