@@ -5,11 +5,11 @@ tap caskroom/cask
 install brew-cask
 
 ### Essentials
-cask install zsh
+install zsh
 cask install iterm2
 # Luaが入らない
 ## cask install macvim-kaoriya
-cask install vim --with-lua
+install vim --with-lua
 install tmux
 install reattach-to-user-namespace
 
@@ -17,7 +17,7 @@ install reattach-to-user-namespace
 ### Browser
 cask install google-chrome
 cask install firefox
-cask install opera
+# cask install opera
 
 ### UI
 cask install karabiner
@@ -39,14 +39,17 @@ cask install virtualbox
 cask install vagrant
 cask install mamp
 cask install sequel-pro
-cask install growlnotify
-cask install quicklook-csv
-cask install quicklook-json
+# cask install growlnotify
+# cask install quicklook-csv
+# cask install quicklook-json
 cask install sublime-text
 cask install imageoptim
+cask install google-japanese-ime
 
 ### Media
+cask install adobe-creative-cloud
 cask install vlc
+cask install vlc-remote
 cask install cooviewer
 cask install radiant-player
 cask install gyazo
@@ -55,7 +58,7 @@ cask install handbrake
 cask install music-manager
 cask install maczip4win
 cask install xld
-cask install lastfm
+# cask install lastfm
 
 ### Other
 cask install keyboard-cleaner
@@ -71,10 +74,21 @@ cask install slack
 cask install sourcetree
 cask install google-hangouts
 cask install cooviewer
+cask install the-unarchiver
+cask install 1password
+cask install alfred
+cask install 1password
+cask install alfred
+cask install caffeine
+cask install dash
+cask install evernote
+cask install skitch
+
 
 ### Adobe
 cask install adobe-creative-cloud
 cask install adobe-air
+cask install flash-player
 
 ## caskroom/versions
 tap caskroom/versions
@@ -86,13 +100,13 @@ install zlib
 
 ## homebrew/php
 tap homebrew/php
-install php56
+install php70
 install composer
 install wp-cli
 
 ## homebrew/versions
 tap homebrew/versions
-install cloog-ppl015
+# install cloog-ppl015
 install gcc
 install gmp4
 install libmpc08
@@ -155,28 +169,5 @@ install gist
 install chromedriver
 install gzip
 install postgresql
-
-# App Store applications
-appstore 1Password
-appstore Alfred
-appstore Caffeine
-appstore CLCL Lite
-appstore Dash
-appstore Day One
-appstore Evernote
-appstore JPEGmini
-appstore Keynote
-appstore LINE
-# appstore Noizio
-appstore Pocket
-appstore PopClip
-appstore Skitch
-appstore Slicy
-appstore The Unarchiver
-appstore Transmit
-appstore Twitter
-appstore Wunderlist
-appstore Xcode
-
-# Other commands
-cleanup
+install heroku
+install nodebrew

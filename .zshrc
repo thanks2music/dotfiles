@@ -313,7 +313,7 @@ eval "$(rbenv init -)"
 export PATH=$PATH:/Applications/MAMP/Library/bin
 
 # for WP-CLI
-export WP_CLI_PHP=/Applications/MAMP/bin/php/php5.6.2/bin/php
+export WP_CLI_PHP=/Applications/MAMP/bin/php/php7.0.0/bin/php
 export PATH="$MAMP_PHP:$PATH"
 
 # homebrew-php
