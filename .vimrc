@@ -110,6 +110,7 @@ NeoBundle 'deris/vim-rengbang'
 " Docs
 NeoBundle 'rizzatti/dash.vim'
 
+NeoBundleFetch 'Shougo/neobundle.vim'
 call neobundle#end()
 
 filetype plugin indent on
