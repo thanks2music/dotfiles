@@ -1,8 +1,7 @@
-"-------------------------------------
-" That's so Vim!
+  "-------------------------------------
+  " WE ARE ALL ONE
 set nocompatible
 "-------------------------------------
-
 " Vars
 let $TODAY = strftime('%Y%m%d')
 let $DESKTOP = expand('~/desktop')
@@ -54,15 +53,13 @@ NeoBundle 'digitaltoad/vim-jade'
 NeoBundle 'dmitry-ilyashevich/vim-typescript'
 NeoBundle 'JulesWang/css.vim'
 NeoBundle 'cakebaker/scss-syntax.vim'
+NeoBundle 'AndrewRadev/splitjoin.vim'
 
 "" UI
-NeoBundle 'Shougo/unite.vim'
 NeoBundle 'Shougo/neomru.vim'
 NeoBundle 'Sixeight/unite-grep'
 NeoBundle 'scrooloose/nerdtree'
 NeoBundle 'scrooloose/nerdcommenter'
-NeoBundle 'Shougo/vimfiler'
-NeoBundle 'Shougo/vimshell.vim'
 NeoBundle 'thinca/vim-qfreplace'
 NeoBundle 'Shougo/vimproc', {
 \ 'build' : {
@@ -109,8 +106,11 @@ NeoBundle 'deris/vim-rengbang'
 "" Replace Zenkaku Hankaku
 " Docs
 NeoBundle 'rizzatti/dash.vim'
+" ES6ハイライトカラー
+NeoBundleLazy 'othree/yajs.vim', {'autoload':{'filetypes':['javascript']}}
 
 NeoBundleFetch 'Shougo/neobundle.vim'
+
 call neobundle#end()
 
 filetype plugin indent on
@@ -122,13 +122,15 @@ NeoBundleCheck
 "-------------------------------------------------------------------------------
 " カラースキーマ
 syntax enable
+set background=dark
 set t_Co=256
+colorscheme hybrid
 
 "" Molokai
 " let g:molokai_original = 1
 " colorscheme railscasts
 " let g:hybrid_use_iTerm_colors = 1
-colorscheme hybrid
+" colorscheme hybrid
 
 "" h2u
 " autocmd ColorScheme * highlight LineNr ctermfg=7 ctermbg=139
@@ -394,44 +396,87 @@ autocmd InsertLeave * highlight StatusLine guifg=#2E4340 guibg=#ccdc90
 augroup END
 " Windowsバックスラッシュ対策 Vundleを使っているのでコメントアウト
 "set shellslash
-" Windowsクリップボードを使用
-set clipboard=unnamed
+" クリップボードを使えるようにする
+set clipboard=unnamed,autoselect
+
+" ペーストするときにインデントさせない
+" if &term =~ "xterm"
+"   let &t_ti .= "\e[?2004h"
+"   let &t_te .= "\e[?2004l"
+"   let &pastetoggle = "\e[201~"
+" 
+"   function XTermPasteBegin(ret)
+"     set paste
+"     return a:ret
+"   endfunction
+" 
+"   noremap <special> <expr> <Esc>[200~ XTermPasteBegin("0i")
+"   inoremap <special> <expr> <Esc>[200~ XTermPasteBegin("")
+"   cnoremap <special> <Esc>[200~ <nop>
+"   cnoremap <special> <Esc>[201~ <nop>
+" endif
+
 
 "-------------------------------------------------------------------------------
-" unite.vim
-let g:unite_enable_start_insert = 1
-let g:unite_update_time = 10
-" バッファ一覧
-nnoremap <silent> ,ub :<C-u>Unite buffer<CR>
-" カレントディレクトリ一覧
-nnoremap <silent> ,ud :<C-u>UniteWithCurrentDir file<CR>
-" バッファのディレクトリ一覧
-nnoremap <silent> ,uf :<C-u>UniteWithBufferDir -buffer-name=files file<CR>
-" レジスタ一覧
-nnoremap <silent> ,ur :<C-u>Unite -buffer-name=register register<CR>
-" 最近使用したファイル一覧
-nnoremap <silent> ,um :<C-u>Unite file_mru<CR>
-" 再帰的ファイル一覧
-nnoremap <silent> ,uu :<C-u>Unite file_rec/async<CR>
-" grep
-" nnoremap ,ug :Unite grep::-iHRn<CR>/*
+" Shougo Plugins
+NeoBundleLazy 'Shougo/vimfiler', {
+\   'autoload' : { 'commands' : [ 'VimFilerBufferDir' ] },
+\   'depends': [ 'Shougo/unite.vim' ],
+\ }
+let s:bundle = neobundle#get('vimfiler')
+function! s:bundle.hooks.on_source(bundle)
+  " Setting
+endfunction
 
-" ウィンドウを分割して開く
-au FileType unite nnoremap <silent> <buffer> <expr> <C-j> unite#do_action('split')
-au FileType unite inoremap <silent> <buffer> <expr> <C-j> unite#do_action('split')
-" ウィンドウを縦に分割して開く
-au FileType unite nnoremap <silent> <buffer> <expr> <C-l> unite#do_action('vsplit')
-au FileType unite inoremap <silent> <buffer> <expr> <C-l> unite#do_action('vsplit')
-" ESCキーを2回押すと終了する
-au FileType unite nnoremap <silent> <buffer> <ESC><ESC> q
-au FileType unite inoremap <silent> <buffer> <ESC><ESC> <ESC>q
+NeoBundleLazy 'Shougo/unite.vim' , {
+\   'autoload' : { 'commands' : [ 'Unite' ] }
+\ }
+let s:bundle = neobundle#get('unite.vim')
+function! s:bundle.hooks.on_source(bundle)
+  " unite.vim
+  let g:unite_enable_start_insert = 1
+  let g:unite_update_time = 10
+  " バッファ一覧
+  nnoremap <silent> ,ub :<C-u>Unite buffer<CR>
+  " カレントディレクトリ一覧
+  nnoremap <silent> ,ud :<C-u>UniteWithCurrentDir file<CR>
+  " バッファのディレクトリ一覧
+  nnoremap <silent> ,uf :<C-u>UniteWithBufferDir -buffer-name=files file<CR>
+  " レジスタ一覧
+  nnoremap <silent> ,ur :<C-u>Unite -buffer-name=register register<CR>
+  " 最近使用したファイル一覧
+  nnoremap <silent> ,um :<C-u>Unite file_mru<CR>
+  " 再帰的ファイル一覧
+  nnoremap <silent> ,uu :<C-u>Unite file_rec/async<CR>
+  " grep
+  " nnoremap ,ug :Unite grep::-iHRn<CR>/*
 
-" unite grep に ag(The Silver Searcher) を使う
-if executable('ag')
-  let g:unite_source_grep_command = 'ag'
-  let g:unite_source_grep_default_opts = '--nogroup --nocolor --column'
-  let g:unite_source_grep_recursive_opt = ''
-endif
+  " ウィンドウを分割して開く
+  au FileType unite nnoremap <silent> <buffer> <expr> <C-j> unite#do_action('split')
+  au FileType unite inoremap <silent> <buffer> <expr> <C-j> unite#do_action('split')
+  " ウィンドウを縦に分割して開く
+  au FileType unite nnoremap <silent> <buffer> <expr> <C-l> unite#do_action('vsplit')
+  au FileType unite inoremap <silent> <buffer> <expr> <C-l> unite#do_action('vsplit')
+  " ESCキーを2回押すと終了する
+  au FileType unite nnoremap <silent> <buffer> <ESC><ESC> q
+  au FileType unite inoremap <silent> <buffer> <ESC><ESC> <ESC>q
+
+  " unite grep に ag(The Silver Searcher) を使う
+  if executable('ag')
+    let g:unite_source_grep_command = 'ag'
+    let g:unite_source_grep_default_opts = '--nogroup --nocolor --column'
+    let g:unite_source_grep_recursive_opt = ''
+  endif
+endfunction
+
+NeoBundleLazy 'Shougo/vimshell', {
+\   'autoload' : { 'commands' : [ 'VimShellBufferDir' ] },
+\   'depends': [ 'Shougo/vimproc' ],
+\ }
+let s:bundle = neobundle#get('vimshell')
+function! s:bundle.hooks.on_source(bundle)
+  " Setting
+endfunction
 
 "-------------------------------------------------------------------------------
 " syntastic
@@ -455,12 +500,14 @@ let g:syntastic_mode_map = { 'mode': 'active',
 
 " let g:syntastic_coffee_coffeelint_args = '-f ~/.vim/coffeelint.json'
 " JavaScript
-let g:syntastic_javascript_checkers = ['jshint']
+let g:syntastic_javascript_checkers = ['eslint']
 "" php
 let g:syntastic_php_checkers = ['php', 'phpcs', 'phpmd']
 
 " jQuery Syntax
-au BufRead,BufNewFile *.js set ft=javascript syntax=jquery
+autocmd BufRead,BufNewFile *.js set ft=javascript syntax=jquery
+" ES6 Syntax
+autocmd BufRead,BufNewFile *.es6 setfiletype javascript
 " quickrun
 let g:quickrun_config = {}
 let g:quickrun_config.markdown = {

@@ -16,7 +16,6 @@ tags
 # Frontend
 .sass-cache/
 *Guardfile
-*gulpfile.coffee
 
 # *Gemfile
 *Gemfile.lock
@@ -29,5 +28,6 @@ tags
 # Composer
 *composer.phar
 
-# Temp
+# Env
 ~/dotfiles/docset/
+~/dotfiles/fonts/*

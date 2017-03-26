@@ -37,6 +37,9 @@ autoload -Uz add-zsh-hook
 autoload -Uz vcs_info
 
 zstyle ':vcs_info:*' enable git svn hg bzr
+zstyle ':vcs_info:git:*' check-for-changes true
+zstyle ':vcs_info:git:*' stagedstr "%F{yellow}!"
+zstyle ':vcs_info:git:*' unstagedstr "%F{red}+"
 zstyle ':vcs_info:*' formats '[%s: %b]'
 zstyle ':vcs_info:*' actionformats '[%s: %b|%a]'
 zstyle ':vcs_info:(svn|bzr):*' branchformat '%b:r%r'
@@ -163,6 +166,7 @@ alias reload='source ~/.zshrc && exec $SHELL'
 
 # vi
 alias v='vi'
+alias vi='vim'
 alias vimrc='vi ~/.vimrc'
 alias zshrc='vi ~/.zshrc'
 alias tmuxrc='vi ~/.tmux.conf'
@@ -203,7 +207,7 @@ alias psd='pg_ctl stop -s -m fast'
 
 # MySQL
 ## for MAMP
-alias mampsql='cd /Applications/MAMP/Library/bin && mysql mysql -u root -p'
+alias mampsql='cd /Applications/MAMP/Library/bin && ./mysql -u root -p'
 
 # returnでlsとgit statusを表示
 function do_enter() {
@@ -232,6 +236,26 @@ function chpwd() { ls -1 }
 # iTerm2のタブ名を変更する
 function title {
   echo -ne "\033]0;"$*"\007"
+}
+
+# gitで差分のzipを作る
+function git_diff_archive() {
+  local diff=""
+  local h="HEAD"
+  if [ $# -eq 1 ]; then
+    if expr "$1" : '[0-9]*$' > /dev/null ; then
+      diff="HEAD HEAD~${1}"
+    else
+      diff="HEAD ${1}"
+    fi
+  elif [ $# -eq 2 ]; then
+    diff="${1} ${2}"
+    h=$1
+  fi
+  if [ "$diff" != "" ]; then
+    diff="git diff --diff-filter=D --name-only ${diff}"
+  fi
+  git archive --format=zip --prefix=root/ $h `eval $diff` -o archive.zip
 }
 
 # tmux auto start
@@ -269,19 +293,16 @@ if ! is_screen_or_tmux_running && shell_has_started_interactively; then
     done
 fi
 
-# git branch / stash 表示
+## Kaoriya Vim
+# if [ -d $HOME/Applications/MacVim.app ]; then
+#   export EDITOR=$HOME/Applications/MacVim.app/Contents/MacOS/Vim
+#   alias vi='$EDITOR "$@"'
+#   alias vim='$EDITOR "$@"'
+#   alias gvim='open -a $HOME/Applications/MacVim.app "$@"'
+# fi
 
 # Vim
-## export EDITOR=/usr/local/bin/vim
-## alias vi='env LANG=ja_JP.UTF-8 /usr/local/bin/vim "$@"'
-
-## Kaoriya Vim
-if [ -d $HOME/Applications/MacVim.app ]; then
-  export EDITOR=$HOME/Applications/MacVim.app/Contents/MacOS/Vim
-  alias vi='$EDITOR "$@"'
-  alias vim='$EDITOR "$@"'
-  alias gvim='open -a $HOME/Applications/MacVim.app "$@"'
-fi
+# export PATH="/usr/local/bin:$PATH"
 
 # Brewfile
 export HOMEBREW_BREWFILE=~/dotfiles/.brewfile
@@ -317,7 +338,7 @@ export WP_CLI_PHP=/Applications/MAMP/bin/php/php7.0.0/bin/php
 export PATH="$MAMP_PHP:$PATH"
 
 # homebrew-php
-export PATH="$(brew --prefix homebrew/php/php56)/bin:$PATH"
+# export PATH="$(brew --prefix homebrew/php/php56)/bin:$PATH"
 
 # for Work
 export MIRRORZ_PATH=$HOME/work/mirrorz/admin/mirrorz
@@ -330,3 +351,24 @@ export PGDATA=/usr/local/var/postgres
 
 ### Added by the Heroku Toolbelt
 export PATH="/usr/local/heroku/bin:$PATH"
+
+### /usr/local/bin を優先させる
+export PATH="/usr/local/bin:$PATH"
+# pyenv for python
+export PYENV_ROOT=${HOME}/.pyenv
+if [ -d "${PYENV_ROOT}" ]; then
+    export PATH=${PYENV_ROOT}/bin:$PATH
+    eval "$(pyenv init -)"
+    eval "$(pyenv virtualenv-init -)"
+fi
+# export PATH=/usr/local/bin:$PATH
+# Powerline
+. ${HOME}/.pyenv/versions/3.5.2/lib/python3.5/site-packages/powerline/bindings/zsh/powerline.zsh
+
+# tmux-powerline
+# PS1="$PS1"'$([ -n "$TMUX" ] && tmux setenv TMUXPWD_$(tmux display -p "#D" | tr -d %) "$PWD")'
+
+
+# PATH の重複を消す
+typeset -U path PATH
+

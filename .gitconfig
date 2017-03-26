@@ -76,9 +76,12 @@
   d4 = diff HEAD~~~~         # HEADから4つ前とdiff
   d5 = diff HEAD~~~~~        # HEADから5つ前とdiff
   d10 = diff HEAD~~~~~~~~~~  # HEADから10前とdiff
-  # Push関連
-  pfr = "!sh -c 'git push origin HEAD:refs/for/master/`git current-branch`'"    # push for review
+  # Push
   push-for-review = "!sh -c 'git push origin HEAD:refs/for/master/`git current-branch`'"
+  # Gerrit
+  review = "!sh -c 'git push origin HEAD:refs/for/master/`git current-branch`'"
+  # GitHub
+  pr = !git push origin $(git current-branch)
   kokomade = tag -f 'ここまで読んだ' origin/master
   newspaper = log -p --reverse 'ここまで読んだ'..origin/master
   # mergeの際にconflictが起きたファイルを編集

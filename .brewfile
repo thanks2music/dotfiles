@@ -28,11 +28,13 @@ cask install bartender
 cask install istat-menus
 cask install divvy
 cask install free-ruler
+cask install licecap
 
 ### Drive
 cask install appcleaner
 cask install dropbox
 cask install skype
+cask install kindle
 
 ### Development Environment
 cask install virtualbox
