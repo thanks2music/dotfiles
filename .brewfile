@@ -8,7 +8,6 @@ install brew-cask
 install zsh
 cask install iterm2
 # Luaが入らない
-## cask install macvim-kaoriya
 install vim --with-lua
 install tmux
 install reattach-to-user-namespace
@@ -17,17 +16,13 @@ install reattach-to-user-namespace
 ### Browser
 cask install google-chrome
 cask install firefox
-# cask install opera
 
 ### UI
 cask install karabiner
-cask install bettertouchtool
-cask install xtrafinder
 cask install clipmenu
 cask install bartender
 cask install istat-menus
 cask install divvy
-cask install free-ruler
 cask install licecap
 
 ### Drive
@@ -37,10 +32,10 @@ cask install skype
 cask install kindle
 
 ### Development Environment
-cask install virtualbox
 cask install vagrant
 cask install mamp
-cask install sequel-pro
+# cask install virtualbox
+# cask install sequel-pro
 # cask install growlnotify
 # cask install quicklook-csv
 # cask install quicklook-json
@@ -49,12 +44,9 @@ cask install imageoptim
 cask install google-japanese-ime
 
 ### Media
-cask install adobe-creative-cloud
 cask install vlc
 cask install vlc-remote
 cask install cooviewer
-cask install radiant-player
-cask install gyazo
 cask install soundflower
 cask install handbrake
 cask install music-manager
@@ -64,27 +56,19 @@ cask install xld
 
 ### Other
 cask install keyboard-cleaner
-cask install libreoffice
-cask install trailer
-cask install tiled
-cask install steam
+# cask install libreoffice
+# cask install trailer
+# cask install tiled
+# cask install steam
 # cask install heroku-toolbelt
 # cask install licecap
 cask install transmission
 cask install magican
-cask install slack
+# cask install slack
 cask install sourcetree
 cask install google-hangouts
-cask install cooviewer
-cask install the-unarchiver
-cask install 1password
-cask install alfred
-cask install 1password
-cask install alfred
 cask install caffeine
 cask install dash
-cask install evernote
-cask install skitch
 
 
 ### Adobe
@@ -102,7 +86,7 @@ install zlib
 
 ## homebrew/php
 tap homebrew/php
-install php70
+install python3
 install composer
 install wp-cli
 
@@ -157,7 +141,6 @@ install reattach-to-user-namespace
 install ruby-build
 install texi2html
 install tig
-install tmux
 install unixodbc
 install watch
 install wget
@@ -165,7 +148,6 @@ install x264
 install xvid
 install yasm
 install yuicompressor
-install zsh
 install zsh-completions
 install gist
 install chromedriver
