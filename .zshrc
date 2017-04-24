@@ -302,7 +302,7 @@ fi
 # fi
 
 # Vim
-# export PATH="/usr/local/bin:$PATH"
+export PATH="/usr/local/bin:$PATH"
 
 # Brewfile
 export HOMEBREW_BREWFILE=~/dotfiles/.brewfile
