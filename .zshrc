@@ -293,6 +293,15 @@ if ! is_screen_or_tmux_running && shell_has_started_interactively; then
     done
 fi
 
+function peco-history-selection() {
+    BUFFER=`history -n 1 | tail -r  | awk '!a[$0]++' | peco`
+    CURSOR=$#BUFFER
+    zle reset-prompt
+}
+
+zle -N peco-history-selection
+bindkey '^R' peco-history-selection
+
 ## Kaoriya Vim
 # if [ -d $HOME/Applications/MacVim.app ]; then
 #   export EDITOR=$HOME/Applications/MacVim.app/Contents/MacOS/Vim
@@ -363,7 +372,7 @@ if [ -d "${PYENV_ROOT}" ]; then
 fi
 # export PATH=/usr/local/bin:$PATH
 # Powerline
-. ${HOME}/.pyenv/versions/3.5.2/lib/python3.5/site-packages/powerline/bindings/zsh/powerline.zsh
+# . ${HOME}/.pyenv/versions/3.5.2/lib/python3.5/site-packages/powerline/bindings/zsh/powerline.zsh
 
 # tmux-powerline
 # PS1="$PS1"'$([ -n "$TMUX" ] && tmux setenv TMUXPWD_$(tmux display -p "#D" | tr -d %) "$PWD")'

@@ -28,6 +28,9 @@ tags
 # Composer
 *composer.phar
 
+# Rails
+*Procfile
+
 # Env
 ~/dotfiles/docset/
 ~/dotfiles/fonts/*
