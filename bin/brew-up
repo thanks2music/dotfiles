@@ -51,9 +51,27 @@ fi
 step 'brew update'
 brew update || exit 1
 
-# ask モード（既定）のまま実行するので、更新の前に一覧と確認が出る。
-step 'brew upgrade（formula と cask）'
-brew upgrade || print '⚠️  brew upgrade の一部が失敗しました（続行します）'
+# Homebrew が無効にした formula（例: icu4c@77）が 1 つでも混ざると、brew upgrade は何も更新せずに中止する。
+# そのため formula は、無効なものを除いて名前を明示して更新し、cask は別に更新する。
+# どちらも ask モード（既定）のまま実行するので、更新の前に一覧と確認が出る。
+export HOMEBREW_NO_AUTO_UPDATE=1   # 直前に brew update 済み
+outdated=(${(f)"$(brew outdated --formula --json=v2 | jq -r '.formulae[] | select(.pinned | not) | .name')"})
+disabled=()
+if (( $#outdated )); then
+	disabled=(${(f)"$(brew info --formula --json=v2 "${outdated[@]}" | jq -r '.formulae[] | select(.disabled) | .full_name')"})
+fi
+formulae=(${outdated:|disabled})
+(( $#disabled )) && print "更新できない formula（Homebrew が無効にしたもの）を除外: ${disabled[*]}"
+
+step 'brew upgrade --formula'
+if (( $#formulae )); then
+	brew upgrade --formula "${formulae[@]}" || print '⚠️  formula の更新の一部が失敗しました（続行します）'
+else
+	print '更新はありません'
+fi
+
+step 'brew upgrade --cask'
+brew upgrade --cask || print '⚠️  cask の更新の一部が失敗しました（続行します）'
 
 # brew cleanup は、使われなくなった依存の削除（autoremove）も行う（HOMEBREW_NO_AUTOREMOVE が無い限り）。
 step 'brew cleanup（autoremove を含む）'
