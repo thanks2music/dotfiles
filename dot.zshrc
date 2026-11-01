@@ -32,7 +32,7 @@ fi
 # Path -------------------------------------------------------------------
 export TERM=xterm-256color
 export LANG=ja_JP.UTF-8
-export XDG_CONFIG_HOME=$HOME/.config
+# XDG_CONFIG_HOME は dot.zshenv に移した（非対話の zsh にも要るため）
 export LS_COLORS='di=01;36'
 export GOPATH=$HOME/code
 export GO15VENDOREXPERIMENT=1
@@ -137,6 +137,13 @@ fi
 
 # VS Code ----------------------------------------------------------------------
 [[ "$TERM_PROGRAM" == "vscode" ]] && type code > /dev/null 2>&1 && . "$(code --locate-shell-integration-path zsh)"
+
+# Package updates --------------------------------------------------------------
+# bin/brew-update-check（launchd が毎日 12:00 に実行）が書く 1 行を表示する。更新が無ければ空ファイル。
+#   NOTE: p10k の instant prompt より前に置く。後ろで出力すると、色が落ちて p10k が警告を出す
+#         （p10k の README は、出力するだけの処理は preamble より前へ移すよう勧めている）。
+#         $(<file) は zsh の組み込みで fork しないので、起動時間はほぼ増えない。
+() { [[ -s $1 ]] && print -r -- "$(<$1)" } "${XDG_CACHE_HOME:-$HOME/.cache}/brew-update-check/motd"
 
 # Powerlevel10k ----------------------------------------------------------------
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then

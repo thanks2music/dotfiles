@@ -1,0 +1,268 @@
+#!/bin/zsh
+#
+# brew-update-check — Homebrew などの更新を毎日確かめる。formula は自動で更新し、
+#                     それ以外（cask / App Store / pnpm / asdf）は通知だけ出す。
+#
+#   使い方:
+#     brew-update-check               # launchd が毎日 12:00 に実行する（手で実行してもよい）
+#     brew-update-check --no-upgrade  # 自動更新をせず、確認と通知の更新だけ行う（brew-up が最後に呼ぶ）
+#
+#   通知先（更新が残っている時だけ）:
+#     - macOS の通知センター（--no-upgrade の時は出さず、ターミナルに一覧を表示する）
+#     - Todoist の「Private 🎧」のタスク 1 件。実行のたびに説明を書き換え、0 件になったら完了にする
+#     - ~/.cache/brew-update-check/motd（dot.zshrc が起動時に 1 行表示する）
+#
+#   登録: setup.sh の phase_launchd が launchd/com.thanks2music.brew-update-check.plist を
+#         ~/Library/LaunchAgents に生成して読み込む。すぐ実行したい時（-k は付けない。実行中のものを kill するため）:
+#           launchctl kickstart gui/$(id -u)/com.thanks2music.brew-update-check
+#   ログ: ~/Library/Logs/brew-update-check/YYYY-MM-DD.log（30 日で削除）
+#
+# 設計:
+#   - formula だけを自動で更新する。cask を更新すると Homebrew は起動中のアプリを終了させ、
+#     pkg 形式の cask は sudo のパスワードを求める。どちらも無人の実行に向かない。
+#   - 自動更新では古い keg を消さない（HOMEBREW_NO_INSTALL_CLEANUP）。起動中のプロセスが Cellar の
+#     パスを参照しているため（例: 開いている nvim の $VIMRUNTIME）。掃除は brew-up の brew cleanup で行う。
+#   - terraform は自動更新しない（EXCLUDE）。プロジェクトの required_version や CI と版を
+#     揃えているため。通知には載り、brew-up では更新する。
+#     brew pin は使わない。pin すると brew-up でも更新されなくなる。
+#   - 更新できない formula（Homebrew が無効にしたもの、pin したもの）は、自動更新と件数から外して参考として表示する。
+#   - バッテリー駆動中は自動更新しない（通知だけ）。
+#   - asdf は「同じ系列の新しい版」だけを数える。nodejs と rust はメジャー、それ以外は
+#     メジャー.マイナーが同じ範囲。系列をまたぐ更新は意図して選ぶものなので数えない。
+#   - 取得に失敗した回は、Todoist のタスクを完了にしない（失敗を「更新 0 件」と取り違えないため）。
+#   - #!/bin/zsh にしている理由: 非対話の zsh でも ~/.zshenv が読まれ、~/.airc.local の
+#     TODOIST_API_TOKEN と、Homebrew が trust.json を探す XDG_CONFIG_HOME が渡る。launchd から起動しても同じ。
+#
+#   テスト用: BREW_UPDATE_CHECK_FORCE_BATTERY=1 を付けると、バッテリー駆動として振る舞う。
+set -u
+setopt pipefail
+
+# NOTE: 除外は「明示した更新対象から外す」だけである。除外した formula が他の更新対象の依存先・依存元だと、
+#       brew upgrade が一緒に更新する（FAQ「Why does brew upgrade <formula> ... also upgrade a bunch of other stuff?」）。
+#       足す前に `brew uses --installed <name>` と `brew deps <name>` が空であることを確かめる。
+readonly -a EXCLUDE=(terraform)
+typeset -rA ASDF_DEPTH=(nodejs 1 rust 1)   # 「同じ系列」とみなす版の桁数。書いていないものは 2（メジャー.マイナー）
+readonly TODOIST_PROJECT='Private 🎧'
+readonly TODOIST_LABEL='quick - 軽い'
+readonly TODOIST_TASK='Mac のパッケージを更新する'
+
+readonly STATE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/brew-update-check"
+readonly LOG_DIR="$HOME/Library/Logs/brew-update-check"
+
+# launchd の PATH は /usr/bin:/bin:/usr/sbin:/sbin だけなので、使うものを明示する。
+# asdf の shims は pnpm（node で動く）のために必要。
+export PATH="$HOME/.asdf/shims:/opt/homebrew/bin:/opt/homebrew/sbin:$HOME/Library/pnpm/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+export HOMEBREW_NO_ENV_HINTS=1 HOMEBREW_NO_INSTALL_CLEANUP=1
+# asdf の shims は、カレントディレクトリの .tool-versions で版を決める。brew-up から呼ばれた時に
+# 呼び出し元のプロジェクトの版（未インストールかもしれない）で pnpm が動かないよう、$HOME で動かす。
+cd "$HOME" || exit 1
+
+no_upgrade=0
+case "${1:-}" in
+	--no-upgrade) no_upgrade=1 ;;
+	'') ;;
+	*) print -u2 'usage: brew-update-check [--no-upgrade]'; exit 2 ;;
+esac
+
+mkdir -p "$STATE_DIR" "$LOG_DIR" || exit 1
+log="$LOG_DIR/$(date +%F).log"
+if [[ -t 1 ]]; then
+	exec > >(tee -a "$log") 2>&1
+else
+	exec >> "$log" 2>&1
+fi
+find "$LOG_DIR" -name '*.log' -mtime +30 -delete 2> /dev/null
+
+# 二重に起動しない。flock はプロセスが終われば（kill されても）カーネルが解放する。
+# mkdir のロックは使わない。zsh は SIGTERM で終わる時に EXIT trap を実行しないので、
+# 実行中に bootout などで止めるとロックが残る。
+# --no-upgrade（brew-up の最後）は、12:00 のジョブが終わるのを最大 30 分待つ。
+zmodload zsh/system || exit 1
+lock="$STATE_DIR/lock"
+: >> "$lock" || exit 1
+if (( no_upgrade )); then
+	zsystem flock -t 1800 "$lock" 2> /dev/null ||
+		{ print '別の brew-update-check が 30 分以上実行中のため中止する'; exit 1; }
+else
+	zsystem flock -t 0 "$lock" 2> /dev/null || { print '別の brew-update-check が実行中のため終了する'; exit 0; }
+fi
+
+print "==> $(date '+%F %T') 開始（no_upgrade=$no_upgrade）"
+errors=()
+
+# 無人のジョブが止まると、launchd は次の 12:00 を起動しない（実行中のジョブを重ねて起動しないため）。
+# ネットワークを使う確認系のコマンドには、coreutils の gtimeout（core の Brewfile にある）で上限を付ける。
+# brew upgrade には付けない。途中で止めると keg が中途半端に残る。
+
+# Go 製の asdf は、Zed 配下だと固まることがあるので noexc を経由する（Zed の外では害がない）。
+noexc=()
+[[ -x ${0:A:h}/noexc ]] && noexc=("${0:A:h}/noexc")
+
+# ---------------------------------------------------------------- 1. brew update
+# --no-upgrade は brew-up が brew update を済ませた直後に呼ぶので省く。
+if (( ! no_upgrade )); then
+	gtimeout 600 brew update --quiet || errors+=('brew update')
+fi
+export HOMEBREW_NO_AUTO_UPDATE=1
+
+outdated_json="$(brew outdated --json=v2)" || errors+=('brew outdated')
+
+# 更新できない formula。Homebrew が無効にしたもの（例: icu4c@77）と pin したもの。
+blocked=(${(f)"$(jq -r '.formulae[]? | select(.pinned) | .name' <<< "$outdated_json")"})
+outdated_names=(${(f)"$(jq -r '.formulae[]? | select(.pinned | not) | .name' <<< "$outdated_json")"})
+if (( $#outdated_names )); then
+	blocked+=(${(f)"$(brew info --formula --json=v2 "${outdated_names[@]}" | jq -r '.formulae[] | select(.disabled) | .full_name')"})
+fi
+
+# ---------------------------------------------------------------- 2. formula の自動更新
+on_ac_power() {
+	[[ -z ${BREW_UPDATE_CHECK_FORCE_BATTERY:-} ]] && pmset -g batt | head -1 | grep -q "'AC Power'"
+}
+
+targets=()
+if (( no_upgrade )); then
+	print '==> 自動更新しない（--no-upgrade）'
+elif ! on_ac_power; then
+	print '==> 自動更新しない（バッテリー駆動中）'
+else
+	for name in "${outdated_names[@]}"; do
+		(( ${EXCLUDE[(Ie)${name##*/}]} || ${blocked[(Ie)$name]} )) && continue
+		targets+=("$name")
+	done
+	if (( $#targets )); then
+		print "==> 自動更新: ${targets[*]}"
+		brew upgrade --formula --yes "${targets[@]}" || errors+=('brew upgrade --formula')
+		outdated_json="$(brew outdated --json=v2)" || errors+=('brew outdated')
+	fi
+fi
+
+# ---------------------------------------------------------------- 3. 残っている更新を集める
+formula_lines=() remaining=()
+for name line in ${(f)"$(jq -r '.formulae[]? | .name, "\(.name) \(.installed_versions | join(", ")) → \(.current_version)"' <<< "$outdated_json")"}; do
+	(( ${blocked[(Ie)$name]} )) && continue
+	remaining+=("$name")
+	(( ${EXCLUDE[(Ie)${name##*/}]} )) && line+='（自動更新の対象外）'
+	formula_lines+=("$line")
+done
+cask_lines=(${(f)"$(jq -r '.casks[]? | "\(.name) \(.installed_versions | join(", ")) → \(.current_version)"' <<< "$outdated_json")"})
+
+# 自動更新したもの = 更新を試みて、もう outdated に出てこないもの（outdated の取得に失敗した回は数えない）
+upgraded=0
+[[ -n $outdated_json ]] && upgraded=${#${(@)targets:|remaining}}
+
+mas_lines=()
+if (( $+commands[mas] )); then
+	if mas_json="$(gtimeout 120 env MAS_NO_AUTO_INDEX=1 mas outdated --json 2> /dev/null)" &&
+		mas_text="$(jq -r '"\(.name) \(.version) → \(.newVersion)"' <<< "$mas_json")"; then
+		mas_lines=(${(f)mas_text})
+	else
+		errors+=('mas outdated')
+	fi
+fi
+
+pnpm_lines=()
+if (( $+commands[pnpm] )); then
+	# pnpm outdated は更新があると終了コード 1 を返す。終了コードではなく、出力が JSON かどうかで失敗を判定する
+	# （出力が空なのは、更新が無く正常に終わった時だけとみなす）。
+	pnpm_json="$(gtimeout 120 pnpm outdated -g --format json 2> /dev/null)"
+	pnpm_rc=$?
+	if [[ -n $pnpm_json ]] && jq -e 'type == "object"' <<< "$pnpm_json" > /dev/null 2>&1; then
+		pnpm_lines=(${(f)"$(jq -r 'to_entries[] | "\(.key) \(.value.current) → \(.value.latest)"' <<< "$pnpm_json")"})
+	elif [[ -n $pnpm_json ]] || (( pnpm_rc != 0 )); then
+		errors+=('pnpm outdated')
+	fi
+fi
+
+asdf_lines=()
+if (( $+commands[asdf] )) && [[ -r $HOME/.tool-versions ]]; then
+	while read -r tool ver _; do
+		[[ $tool != \#* && $ver =~ '^[0-9]+(\.[0-9]+)*$' ]] || continue   # 空行・コメント・system や ref:... は対象外
+		prefix=${(j:.:)${(s:.:)ver}[1,${ASDF_DEPTH[$tool]:-2}]}
+		# asdf latest は使わない。前方一致で 1.2 から 1.27.x を返し、python では 3.15.2 より 3.15.2t（free-threaded 版）を返す。
+		# 一覧から、同じ系列で数字とドットだけの版を選んで最大のものを取る。
+		# < /dev/null: このループは標準入力から .tool-versions を読んでいるので、子に食わせない。
+		if ! all="$(gtimeout 120 "${noexc[@]}" asdf list all "$tool" "$prefix" 2> /dev/null < /dev/null)"; then
+			errors+=("asdf list all $tool")
+			continue
+		fi
+		latest="$(print -r -- "$all" | tr -d ' ' | grep -E "^${prefix//./\\.}(\.[0-9]+)*$" | sort -V | tail -1)"
+		[[ -n $latest && $latest != "$ver" ]] && asdf_lines+=("$tool $ver → $latest")
+	done < "$HOME/.tool-versions"
+fi
+
+total=0 parts=()
+for label var in cask cask_lines formula formula_lines 'App Store' mas_lines pnpm pnpm_lines asdf asdf_lines; do
+	n=${#${(P)var}}
+	(( n )) || continue
+	parts+=("$label $n")
+	(( total += n ))
+done
+
+# ---------------------------------------------------------------- 4. 一覧（Todoist の説明にも使う）
+section() {
+	local title=$1; shift
+	(( $# )) || return 0
+	print; print "**$title**（$# 件）"; printf -- '- %s\n' "$@"
+}
+summary="$STATE_DIR/summary.md"
+{
+	print "$(date '+%F %H:%M') 時点で更新が残っているもの: $total 件"
+	section 'cask — brew-up で更新' "${cask_lines[@]}"
+	section 'formula — brew-up で更新' "${formula_lines[@]}"
+	section 'App Store — brew-up で更新' "${mas_lines[@]}"
+	section 'pnpm のグローバル — brew-up で更新' "${pnpm_lines[@]}"
+	section 'asdf — dot.tool-versions を書き換えて tools/asdf.sh を実行' "${asdf_lines[@]}"
+	section '参考: 更新できない formula（Homebrew が無効にしたもの・pin したもの。件数には含めない）' "${blocked[@]}"
+	if (( upgraded )); then
+		print; print "自動で更新した formula: $upgraded 件"
+	fi
+} > "$summary.tmp"
+mv "$summary.tmp" "$summary"
+
+# ---------------------------------------------------------------- 5. Todoist
+todo() { gtimeout 60 td --no-spinner "$@"; }
+sync_todoist() {
+	local id
+	(( $+commands[td] )) || { print '==> Todoist: td（todoist-cli）が見つからないため skip'; return 0; }
+	[[ -n ${TODOIST_API_TOKEN:-} ]] || { print '==> Todoist: TODOIST_API_TOKEN が無いため skip'; return 0; }
+	id="$(todo task list --project "$TODOIST_PROJECT" --all --ndjson |
+		jq -r --arg c "$TODOIST_TASK" 'select(._meta | not) | select(.content == $c) | .id' | head -1)" || return 1
+	if (( total )); then
+		if [[ -n $id ]]; then
+			# 期限は作成時だけ付ける。ユーザーが延期した期限を毎日上書きしないため。
+			todo -q task update "id:$id" --stdin < "$summary" || return 1
+		else
+			todo -q task add "$TODOIST_TASK" --project "$TODOIST_PROJECT" \
+				--labels "$TODOIST_LABEL" --due today --stdin < "$summary" || return 1
+		fi
+		print "==> Todoist: タスクを更新した"
+	elif [[ -n $id ]] && (( ! $#errors )); then
+		todo -q task complete "id:$id" || return 1
+		print '==> Todoist: 更新が 0 件になったのでタスクを完了にした'
+	fi
+}
+sync_todoist || errors+=('Todoist')
+
+# ---------------------------------------------------------------- 6. motd と通知
+{
+	if (( total )); then
+		print -r -- "📦 更新が $total 件あります（${(j: / :)parts}）。brew-up で更新できます"
+	fi
+	if (( $#errors )); then
+		print -r -- "⚠️  brew-update-check が失敗しました（${(j:, :)errors}）: $log"
+	fi
+} > "$STATE_DIR/motd"
+
+notify() {
+	osascript -e 'on run argv' -e 'display notification (item 2 of argv) with title (item 1 of argv)' \
+		-e 'end run' "$1" "$2" > /dev/null 2>&1 || print '==> 通知を出せなかった'
+}
+if (( no_upgrade )); then
+	cat "$summary"
+else
+	(( $#errors )) && notify 'brew-update-check が失敗しました' "${(j:, :)errors} — ログ: $log"
+	(( total ))    && notify "更新が $total 件あります" "${(j: / :)parts} — brew-up で更新できます"
+fi
+
+print "==> $(date '+%F %T') 終了（残り $total 件、自動更新 $upgraded 件、エラー $#errors 件）"
+exit $(( $#errors > 0 ))

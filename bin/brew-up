@@ -1,0 +1,87 @@
+#!/bin/zsh
+#
+# brew-up — Homebrew（formula と cask）・App Store・pnpm のグローバルを、手でまとめて更新する
+#
+#   使い方: brew-up
+#
+#   毎日 12:00 に launchd が実行する brew-update-check は、formula だけを自動で更新し、
+#   残りを通知（通知センター・Todoist・ターミナル起動時の 1 行）する。通知が来たらこれを実行する。
+#   最後に brew-update-check --no-upgrade を呼ぶので、Todoist のタスクと motd もその場で更新される。
+#
+#   NOTE: Zed の中からではなく、iTerm2 などから実行する。
+#         - cask を更新すると、Homebrew は起動中のアプリ（Zed・Docker など）を終了させる。
+#           Docker が止まると、docker で起動している backlog の MCP も止まる。
+#         - pkg 形式の cask（blackhole・zoom など）と mas 7 の upgrade は sudo のパスワードを求める。
+#
+#   asdf のランタイムは上げない。版の固定はリポジトリ（dot.tool-versions）の変更なので、
+#   最後に表示される一覧を見て dot.tool-versions を書き換え、bash ~/dotfiles/tools/asdf.sh を実行する。
+set -u
+setopt pipefail
+
+# 親プロセスをたどり、Zed にたどり着くかで判定する（Zed の端末は Zed.app の子孫になる）。
+under_zed() {
+	local pid=$$ comm
+	while (( pid > 1 )); do
+		# ps が何も返さなければ pid が空になり、ループを抜ける。
+		read -r pid comm <<< "$(ps -o ppid=,comm= -p "$pid" 2> /dev/null)"
+		[[ $comm == */Zed.app/* ]] && return 0
+	done
+	return 1
+}
+
+step() { print -P "%F{cyan}==> $*%f"; }
+
+if under_zed; then
+	print '⚠️  Zed の中で実行しています。cask を更新すると、Zed や Docker が終了することがあります。'
+	read -q '?続けますか? [y/N] '; print
+	[[ $REPLY == y ]] || exit 1
+fi
+
+# 12:00 の brew-update-check（formula の自動更新）と同時に brew を動かさないよう、同じロックを取る。
+# NOTE: zsystem flock は fcntl のロックなので、`print -u` やロックファイルへのリダイレクトで外れる（zshmodules(1)）。
+#       ロックを持っている間は `print -u` を使わない。
+zmodload zsh/system || exit 1
+lock="${XDG_CACHE_HOME:-$HOME/.cache}/brew-update-check/lock"
+mkdir -p "${lock:h}" && : >> "$lock" || exit 1
+if ! zsystem flock -t 0 -f lock_fd "$lock" 2> /dev/null; then
+	print 'brew-update-check（12:00 の自動更新）が実行中です。終わるまで待ちます（最大 30 分）'
+	zsystem flock -t 1800 -f lock_fd "$lock" 2> /dev/null || { print '待ちきれなかったので中止します'; exit 1; }
+fi
+
+step 'brew update'
+brew update || exit 1
+
+# ask モード（既定）のまま実行するので、更新の前に一覧と確認が出る。
+step 'brew upgrade（formula と cask）'
+brew upgrade || print '⚠️  brew upgrade の一部が失敗しました（続行します）'
+
+# brew cleanup は、使われなくなった依存の削除（autoremove）も行う（HOMEBREW_NO_AUTOREMOVE が無い限り）。
+step 'brew cleanup（autoremove を含む）'
+brew cleanup
+
+if command -v mas > /dev/null; then
+	step 'App Store（sudo mas upgrade）'
+	if [[ -n "$(MAS_NO_AUTO_INDEX=1 mas outdated 2> /dev/null)" ]]; then
+		sudo mas upgrade
+	else
+		print '更新はありません'
+	fi
+fi
+
+if command -v pnpm > /dev/null; then
+	step 'pnpm のグローバル'
+	pnpm_lines="$(pnpm outdated -g --format json 2> /dev/null |
+		jq -r 'to_entries[]? | "\(.key) \(.value.current) → \(.value.latest)"' 2> /dev/null)"
+	if [[ -n $pnpm_lines ]]; then
+		print -r -- "$pnpm_lines"
+		read -q '?最新版（メジャー更新を含む）に更新しますか? [y/N] '; print
+		[[ $REPLY == y ]] && pnpm update -g --latest
+	else
+		print '更新はありません'
+	fi
+fi
+
+step '確認と通知の更新（brew-update-check --no-upgrade）'
+# brew-update-check は同じロックを取るので、呼ぶ前に手放す。
+zsystem flock -u $lock_fd
+"${0:A:h}/brew-update-check" --no-upgrade

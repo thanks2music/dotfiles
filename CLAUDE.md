@@ -36,9 +36,24 @@ brew bundle install --file=~/dotfiles/Brewfile.desktop    # heavy / desktop-only
 brew bundle install --file=~/dotfiles/Brewfile.vscode     # VS Code itself + extensions
 brew bundle install --file=~/dotfiles/Brewfile.mas        # Mac App Store apps (sign in to the App Store first)
 
-# Update Homebrew packages
-brew update && brew upgrade
+# Update everything by hand (Homebrew formulae + casks, App Store, pnpm globals)
+brew-up        # run from iTerm2, not Zed: cask upgrades quit running apps (Zed, Docker)
 ```
+
+### Update checks (LaunchAgent)
+
+`bin/brew-update-check` runs daily at 12:00 via `launchd/com.thanks2music.brew-update-check.plist`
+(rendered into `~/Library/LaunchAgents` and loaded by `setup.sh`'s `phase_launchd`).
+
+- It auto-upgrades **formulae only**, and only on AC power. `terraform` is excluded (`EXCLUDE`)
+  because projects pin it; `brew-up` still upgrades it. Do not `brew pin` instead — pinning
+  also blocks `brew-up`.
+- Everything else (casks, `mas outdated`, `pnpm outdated -g`, same-series asdf releases) is
+  only reported, via macOS notification, one Todoist task in "Private 🎧" (needs
+  `TODOIST_API_TOKEN` in `~/.airc.local`), and a line printed by `.zshrc` from
+  `~/.cache/brew-update-check/motd`.
+- Logs: `~/Library/Logs/brew-update-check/`. Run now:
+  `launchctl kickstart gui/$(id -u)/com.thanks2music.brew-update-check` (no `-k`: it would kill a run in progress)
 
 ## File Structure & Naming Convention
 
@@ -48,6 +63,8 @@ brew update && brew upgrade
 - `bin/` → Executable scripts symlinked to `~/bin`
 - `config/` → Configuration files symlinked to `~/.config`
 - `tools/` → Helper scripts run by hand or by git (not linked to `~/bin`)
+- `launchd/` → LaunchAgent templates (`__HOME__` placeholder). `setup.sh` renders them into
+  `~/Library/LaunchAgents` and loads them (generated, not symlinked: plists need absolute paths)
 - `.gitattributes` → Assigns a git clean filter to `config/zed/settings.json`
   (`tools/git-filter-zed-settings.sh`; see its header for what it does and how to change the defaults)
 
@@ -58,7 +75,8 @@ The shell configuration is split into multiple layers (loaded in order):
 **ZSH:**
 1. `.zshenv` - Read on **every** zsh invocation (interactive, non-interactive, scripts).
    Sources `.airc` then `.airc.local`, so Claude Code settings and API keys reach
-   child processes such as MCP servers. Keep it silent and cheap.
+   child processes such as MCP servers. Also exports `XDG_CONFIG_HOME` (Homebrew reads
+   `trust.json` from there; launchd jobs need it too). Keep it silent and cheap.
 2. `.zprofile` - Login shells only. Holds `brew shellenv` (the only place it lives).
 3. `.zshrc` - Main interactive configuration
 4. `.aliasrc` - Shared aliases
