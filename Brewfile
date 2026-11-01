@@ -21,8 +21,15 @@
 #   2026-08-24 に Air の初回構築で 6 件（ddev/ddev, shivammathur/php, harelba/q,
 #   stripe/stripe-cli, golangci/tap, hashicorp/tap）がこの状態になっていたため削除した。
 #   いずれも対応 formula を core から外した際に tap 行だけ残していたもの。
+#   2026-11-01: hashicorp/tap（terraform）と stripe/stripe-cli（stripe）は、Pro で使っている
+#   formula を Brewfile に戻したので、tap も戻した。
+#   信頼は tap ではなく formula 単位で付ける（mongodb/brew も同日に揃えた）。bin/brew-update-check が formula を
+#   無人で自動更新するため。公式 Tap-Trust: "For one-off installs, automation or software from a vendor you do
+#   not fully control, prefer trusting only the required item."
 tap "anthropics/tap"
-tap "mongodb/brew", trusted: true
+tap "hashicorp/tap"
+tap "mongodb/brew"
+tap "stripe/stripe-cli"
 tap "supabase/tap"
 brew "ack"
 brew "actionlint"
@@ -47,7 +54,6 @@ brew "cloud-sql-proxy"
 brew "cloudflared"
 brew "cmake"
 brew "cocoapods"
-brew "code-server"
 brew "colordiff"
 brew "composer"
 brew "coreutils"
@@ -108,7 +114,7 @@ brew "lv"
 brew "mas"
 brew "mercurial"
 brew "mongodb/brew/mongodb-community-shell", trusted: true
-brew "mongodb/brew/mongodb-database-tools"
+brew "mongodb/brew/mongodb-database-tools", trusted: true
 brew "mongosh"
 brew "multitail"
 brew "mysql-client" # サーバー（mysql）は入れない。ローカルの DB は各プロジェクトの Docker で本番と同じ版に揃える
@@ -133,24 +139,28 @@ brew "pigz"
 brew "pkgconf"
 brew "plantuml"
 brew "pngquant"
+brew "poppler"
 brew "powerlevel10k" # プロンプトテーマ。従来は ~/.config へ手動 clone していた
 brew "pstree"
 brew "pup"
 brew "pv"
 brew "pwgen"
-brew "python@3.10"
 brew "python@3.11"
 brew "python@3.14"
 brew "re2c"
 brew "reattach-to-user-namespace"
 brew "ripgrep"
+brew "rsync"
 brew "ruby-build"
 brew "shared-mime-info"
 brew "shellcheck"
 brew "sops"
 brew "stern"
+brew "stripe/stripe-cli/stripe", trusted: true
 brew "subversion"
 brew "supabase/tap/supabase", trusted: true
+brew "tailscale"
+brew "hashicorp/tap/terraform", trusted: true # homebrew/core には無い（BUSL への変更で外れた。formulae.brew.sh で 404）ので HashiCorp の tap を使う
 brew "tesseract"
 brew "tig"
 brew "tmux"
@@ -168,22 +178,28 @@ brew "wp-cli"
 brew "xq"
 brew "yarn"
 brew "yq"
+brew "yt-dlp"
 brew "zlib"
 brew "zoxide"
 brew "zsh"
 brew "zsh-autosuggestions"
 brew "zsh-completions"
-brew "zsh-git-prompt"
 brew "zstd"
+# 2026-11-01 に外した formula（非推奨になったもの。いずれもアンインストール済み）:
+#   code-server（Copilot の非 FOSS 化で 2026-04-11 に非推奨）、python@3.10（上流の EOL で 2026-10-01 に非推奨）、
+#   zsh-git-prompt（保守終了で非推奨。プロンプトは powerlevel10k）
 # 意図的に外した cask（2026-10-27 の棚卸し）。Pro にはまだ入っているので `brew bundle dump` には出てくるが、
 #   差分を反映するときに戻さない。使っているかは `bash tools/brewfile-usage.sh` で確かめた。
 #   .app を削除済み:      bartender clipy dbeaver-community github gitify gyazo keyboard-cleaner poedit smartsvn
 #   1 年以上使っていない: bruno deepl flutter（普段は fvm 経由） switchhosts typora whatsapp
-#   使っていない:         daisydisk divvy ghostty hammerspoon ip-in-menu-bar licecap onyx pgadmin4 teamviewer
+#   使っていない:         divvy ghostty hammerspoon ip-in-menu-bar licecap onyx pgadmin4 teamviewer
+#   （以上は 2026-11-01 に Pro からもアンインストールした。daisydisk は有料版を買っていたので Brewfile.desktop へ移した）
 #   使っているアプリの設定から参照していないフォント: font-iosevka-nerd-font font-monoid-nerd-font
 #                         font-moralerspace font-terminess-ttf-nerd-font font-victor-mono-nerd-font
 #                         font-sauce-code-pro-nerd-font（config/alacritty だけが参照。Alacritty 本体は入れていない）
 #   Brewfile.vscode へ移した: visual-studio-code
+cask "1password"
+cask "1password-cli" # op コマンド。dot.zshrc.local の OP_ACCOUNT で使う
 cask "alfred"
 cask "anthropics/tap/ant", trusted: true # Claude API の CLI。Revolution の ai-writer のローカルの認証 (ant auth login)
 cask "antigravity"
