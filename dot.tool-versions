@@ -13,9 +13,9 @@
 # 更新手順: 同じ系列の最新を確認 → ここを書き換え → tools/asdf.sh を実行
 #   確認は bin/brew-update-check の一覧（Todoist のタスク・ターミナル起動時の 1 行）か `asdf list all <tool> <系列>` で行う。
 #   asdf latest は使わない。前方一致で 1.2 から 1.27.x を返し、python では 3.15.2t（free-threaded 版）を返す。
-nodejs 26.12.1
-ruby 3.3.1
-python 3.15.1
+nodejs 26.13.0
+ruby 3.3.11
+python 3.15.2
 golang 1.27.3
-bun 1.4.3
-rust 1.87.0
+bun 1.4.4
+rust 1.99.1
