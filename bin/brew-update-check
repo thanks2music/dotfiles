@@ -232,8 +232,9 @@ sync_todoist() {
 			# 期限は作成時だけ付ける。ユーザーが延期した期限を毎日上書きしないため。
 			todo -q task update "id:$id" --stdin < "$summary" || return 1
 		else
+			# task add は -q でも作成したタスクの ID を標準出力に出すので捨てる。
 			todo -q task add "$TODOIST_TASK" --project "$TODOIST_PROJECT" \
-				--labels "$TODOIST_LABEL" --due today --stdin < "$summary" || return 1
+				--labels "$TODOIST_LABEL" --due today --stdin < "$summary" > /dev/null || return 1
 		fi
 		print "==> Todoist: タスクを更新した"
 	elif [[ -n $id ]] && (( ! $#errors )); then

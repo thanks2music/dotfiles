@@ -37,24 +37,12 @@ if under_zed; then
 	[[ $REPLY == y ]] || exit 1
 fi
 
-# 12:00 の brew-update-check（formula の自動更新）と同時に brew を動かさないよう、同じロックを取る。
-# NOTE: zsystem flock は fcntl のロックなので、`print -u` やロックファイルへのリダイレクトで外れる（zshmodules(1)）。
-#       ロックを持っている間は `print -u` を使わない。
-zmodload zsh/system || exit 1
-lock="${XDG_CACHE_HOME:-$HOME/.cache}/brew-update-check/lock"
-mkdir -p "${lock:h}" && : >> "$lock" || exit 1
-if ! zsystem flock -t 0 -f lock_fd "$lock" 2> /dev/null; then
-	print 'brew-update-check（12:00 の自動更新）が実行中です。終わるまで待ちます（最大 30 分）'
-	zsystem flock -t 1800 -f lock_fd "$lock" 2> /dev/null || { print '待ちきれなかったので中止します'; exit 1; }
-fi
-
 step 'brew update'
 brew update || exit 1
 
-# Homebrew が無効にした formula（例: icu4c@77）が 1 つでも混ざると、brew upgrade は何も更新せずに中止する。
+# Homebrew が無効にした formula（例: icu4c@77）は更新できず、混ざるとエラーになって「一部が失敗」と表示される。
 # そのため formula は、無効なものを除いて名前を明示して更新し、cask は別に更新する。
-# どちらも ask モード（既定）のまま実行するので、更新の前に一覧と確認が出る。
-export HOMEBREW_NO_AUTO_UPDATE=1   # 直前に brew update 済み
+export HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_ENV_HINTS=1   # 直前に brew update 済み
 outdated=(${(f)"$(brew outdated --formula --json=v2 | jq -r '.formulae[] | select(.pinned | not) | .name')"})
 disabled=()
 if (( $#outdated )); then
@@ -62,25 +50,53 @@ if (( $#outdated )); then
 fi
 formulae=(${outdated:|disabled})
 (( $#disabled )) && print "更新できない formula（Homebrew が無効にしたもの）を除外: ${disabled[*]}"
+casks=(${(f)"$(brew outdated --cask --json=v2 | jq -r '.casks[].name')"})
 
-step 'brew upgrade --formula'
-if (( $#formulae )); then
-	brew upgrade --formula "${formulae[@]}" || print '⚠️  formula の更新の一部が失敗しました（続行します）'
+# 一覧と確認は、ロックを取る前に済ませる。確認の [y/N] で止まっている間、12:00 の自動実行を塞がないため。
+# 確認のあとは --yes で更新する（Homebrew の ask モードで同じことを 2 回聞かない）。
+if (( $#formulae + $#casks )); then
+	(( $#formulae )) && print "formula（${#formulae} 件）: ${formulae[*]}"
+	(( $#casks ))    && print "cask（${#casks} 件。起動中のアプリは終了・再起動される）: ${casks[*]}"
+	read -q '?Homebrew の更新を実行しますか? [y/N] '; print
 else
-	print '更新はありません'
+	print 'Homebrew の更新はありません'
+	REPLY=n
 fi
 
-step 'brew upgrade --cask'
-brew upgrade --cask || print '⚠️  cask の更新の一部が失敗しました（続行します）'
+if [[ $REPLY == y ]]; then
+	# 12:00 の brew-update-check（formula の自動更新）と同時に brew を動かさないよう、同じロックを取る。
+	# NOTE: zsystem flock は fcntl のロックなので、`print -u` やロックファイルへのリダイレクトで外れる（zshmodules(1)）。
+	#       ロックを持っている間は `print -u` を使わない。
+	zmodload zsh/system || exit 1
+	lock="${XDG_CACHE_HOME:-$HOME/.cache}/brew-update-check/lock"
+	mkdir -p "${lock:h}" && : >> "$lock" || exit 1
+	if ! zsystem flock -t 0 -f lock_fd "$lock" 2> /dev/null; then
+		print 'brew-update-check（12:00 の自動更新）が実行中です。終わるまで待ちます（最大 30 分）'
+		zsystem flock -t 1800 -f lock_fd "$lock" 2> /dev/null || { print '待ちきれなかったので中止します'; exit 1; }
+	fi
 
-# brew cleanup は、使われなくなった依存の削除（autoremove）も行う（HOMEBREW_NO_AUTOREMOVE が無い限り）。
-step 'brew cleanup（autoremove を含む）'
-brew cleanup
+	if (( $#formulae )); then
+		step 'brew upgrade --formula'
+		brew upgrade --formula --yes "${formulae[@]}" || print '⚠️  formula の更新の一部が失敗しました（続行します）'
+	fi
+	if (( $#casks )); then
+		step 'brew upgrade --cask'
+		brew upgrade --cask --yes "${casks[@]}" || print '⚠️  cask の更新の一部が失敗しました（続行します）'
+	fi
+
+	# brew cleanup は、使われなくなった依存の削除（autoremove）も行う（HOMEBREW_NO_AUTOREMOVE が無い限り）。
+	step 'brew cleanup（autoremove を含む）'
+	brew cleanup
+
+	# brew-update-check（最後に呼ぶ）は同じロックを取るので、ここで手放す。
+	zsystem flock -u $lock_fd
+fi
 
 if command -v mas > /dev/null; then
 	step 'App Store（sudo mas upgrade）'
 	if [[ -n "$(MAS_NO_AUTO_INDEX=1 mas outdated 2> /dev/null)" ]]; then
-		sudo mas upgrade
+		# sudo は環境変数を引き継がないので、env で MAS_NO_AUTO_INDEX を渡す（Spotlight の警告が大量に出るのを止める）。
+		sudo env MAS_NO_AUTO_INDEX=1 mas upgrade
 	else
 		print '更新はありません'
 	fi
@@ -100,6 +116,4 @@ if command -v pnpm > /dev/null; then
 fi
 
 step '確認と通知の更新（brew-update-check --no-upgrade）'
-# brew-update-check は同じロックを取るので、呼ぶ前に手放す。
-zsystem flock -u $lock_fd
 "${0:A:h}/brew-update-check" --no-upgrade
