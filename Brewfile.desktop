@@ -14,7 +14,7 @@
 #   使っていない:         cursor warp local mamp（local と mamp は前々職の遺産）
 #   （以上は 2026-11-01 に Pro からもアンインストールした。MAMP の htdocs と db は ~/Archive/MAMP-2026-11-01 に退避）
 #   2026-11-01 に戻したもの: daisydisk（有料版を購入済み）、minecraft、steam
-#   2026-11-03 に外したもの: kiro-cli。Kiro CLI は自分で ~/.local/bin と /Applications/Kiro CLI.app に入れて自動更新する。
+#   2026-11-03 に外したもの: kiro-cli。Kiro CLI は自分で ~/.local/bin/kiro-cli に入れて自動更新する（standalone 版）。
 #                           cask の記録は改名前（amazon-q）の 1.3.0 のまま壊れ、brew upgrade が毎回失敗していた。
 
 brew "ideviceinstaller"

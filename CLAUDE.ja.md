@@ -295,5 +295,6 @@ zshlog    # ~/.zsh_history
 2. **PATH 管理**：asdf shims が pnpm グローバルパッケージより優先されます。
    vercel CLI などの pnpm ツールは asdf が管理していないため引き続き解決されます
 3. **バージョンマネージャー**：asdf のみ、かつ言語ランタイム専用です。rbenv/anyenv は削除しました
-4. **シェル統合**：Amazon QとVS Codeのシェル統合が自動的に読み込まれます
+4. **シェル統合**：VS Code のシェル統合が自動的に読み込まれます。Kiro CLI（旧 Amazon Q）は `~/.local/bin` の単体バイナリになり、
+   rc ファイルの pre/post ブロックは無くなりました
 5. **セキュリティ**：`.local`ファイルは決してコミットしないでください - 機密情報が含まれています

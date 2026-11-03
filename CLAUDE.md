@@ -298,5 +298,6 @@ zshlog    # ~/.zsh_history
 2. **PATH Management**: asdf shims take priority over pnpm global packages.
    pnpm tools like the vercel CLI still resolve because asdf does not manage them
 3. **Version Managers**: asdf only, and only for language runtimes. rbenv/anyenv were removed
-4. **Shell Integration**: Amazon Q and VS Code shell integrations are loaded automatically
+4. **Shell Integration**: The VS Code shell integration is loaded automatically. Kiro CLI (formerly Amazon Q)
+   is a standalone binary in `~/.local/bin` and no longer has pre/post blocks in the rc files
 5. **Security**: Never commit `.local` files - they contain sensitive information
