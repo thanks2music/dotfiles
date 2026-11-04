@@ -1,0 +1,169 @@
+#!/bin/bash
+#
+# t4v-revo-dmarc-daily — Revolution のサイトのドメインの DMARC レポートを毎日チェックする入口。
+#                        本体は one-more-time の scripts/dmarc/dmarc-daily.ts。
+#
+#   使い方:
+#     t4v-revo-dmarc-daily             # launchd が毎朝 9:00 に実行する
+#     t4v-revo-dmarc-daily --dry-run   # 送り先をすべて開発系にし [TEST] を付ける。state を更新しない
+#     (そのほかの引数は dmarc-daily.ts にそのまま渡す。例: --fixture <xml> / --no-claude)
+#
+#     T4V_REVO_DMARC_APP=<scripts/dmarc のパス> t4v-revo-dmarc-daily --dry-run
+#       マージ前の動作確認用。worktree を使わず、指定した場所のコードを動かす
+#
+#   登録: setup.sh の phase_launchd が launchd/com.thanks2music.t4v-revo-dmarc.plist を読み込む。
+#         すぐ実行したい時: launchctl kickstart gui/$(id -u)/com.thanks2music.t4v-revo-dmarc
+#   ログ: ~/Library/Logs/t4v-revo-dmarc/YYYY-MM-DD.log (30 日で削除)
+#
+# 設計:
+#   - one-more-time の作業ツリーは feature ブランチになっていることが多いので、自動実行専用の worktree
+#     ($WORKTREE) を origin/main に置いて動かす。main は作業ツリー側で checkout されていることがあるため、
+#     ブランチではなく detached HEAD にする
+#   - トークンはキーチェーンから読み、env で渡す。値はログに出さない
+#       t4v-revo-dmarc.slack-bot-token    Slack の bot token (revolution の通知と同じもの)
+#       t4v-revo-dmarc.claude-oauth-token 個人アカウントの `claude setup-token` (1 年で切れる)
+#   - Slack の送り先は ~/.config/t4v-revo-dmarc/slack.env に置く (公開リポジトリに Slack の構成を載せないため)。
+#     中身と作り方は one-more-time の scripts/dmarc/README.md
+#   - git fetch に失敗しても (スリープから復帰した直後でネットワークがまだ無い等)、少し待ってやり直し、
+#     それでも駄目なら手元の worktree のまま動かす。チェックそのものを飛ばさないため
+#   - dmarc-daily.ts は失敗も自分で Slack に知らせ、届けられなかった時だけ 1 を返す。
+#     ここ (node を起動する前を含む) で失敗した時は、この入口が本番系へメンション付きで知らせる。
+#     Slack にも届かない時は、macOS の通知を出す
+set -u
+set -o pipefail
+
+REPO="$HOME/work/dev/my-projects/one-more-time"
+WORKTREE="$HOME/.local/share/t4v-revo-dmarc/one-more-time"
+APP="${T4V_REVO_DMARC_APP:-$WORKTREE/scripts/dmarc}"
+LOG_DIR="$HOME/Library/Logs/t4v-revo-dmarc"
+
+SLACK_ENV="$HOME/.config/t4v-revo-dmarc/slack.env"
+
+# launchd の PATH は最小限なので、node (asdf)・claude・git (Homebrew) を足す
+export PATH="$HOME/.asdf/shims:$HOME/.local/bin:/opt/homebrew/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+
+mkdir -p "$LOG_DIR"
+exec >> "$LOG_DIR/$(date +%F).log" 2>&1
+find "$LOG_DIR" -name '*.log' -mtime +30 -delete 2> /dev/null || true
+
+log() { printf '[%s] %s\n' "$(date '+%F %T')" "$*"; }
+
+DRY_RUN=0
+for a in "$@"; do [ "$a" = "--dry-run" ] && DRY_RUN=1; done
+
+# 失敗を知らせる。dry-run では開発系に [TEST] で送る
+notify_failure() {
+	local stage="$1" detail="$2" channel="$SLACK_CHANNEL_PROD" text
+	text="<@$SLACK_MENTION_USER_ID> ❌ DMARC の自動チェックが起動前に失敗しました ($stage)"
+	if [ "$DRY_RUN" = 1 ]; then
+		channel="$SLACK_CHANNEL_DEV"
+		text="[TEST] ❌ DMARC の自動チェックが起動前に失敗しました ($stage)"
+	fi
+	text="$text
+$detail
+ログ: $LOG_DIR/$(date +%F).log"
+	log "失敗: $stage"
+	if [ -n "${SLACK_BOT_TOKEN:-}" ]; then
+		# & < > は値の中にしか来ないが、念のため jq で JSON にする (エスケープは段階名と固定文だけなので不要)
+		local ok
+		ok="$(jq -n --arg c "$channel" --arg t "$text" '{channel:$c, text:$t, unfurl_links:false}' |
+			curl -sS --max-time 10 -X POST https://slack.com/api/chat.postMessage \
+				-H "Authorization: Bearer $SLACK_BOT_TOKEN" -H 'Content-Type: application/json; charset=utf-8' --data @- |
+			jq -r '.ok' 2> /dev/null)"
+		[ "$ok" = "true" ] && return 0
+		log "Slack への送信にも失敗した"
+	fi
+	osascript -e "display notification \"$stage で失敗。ログ: $LOG_DIR\" with title \"DMARC の自動チェック\"" 2> /dev/null || true
+}
+
+keychain() { security find-generic-password -a "$USER" -s "$1" -w 2> /dev/null; }
+
+log "開始 (args: $*)"
+
+# Slack の送り先を読む (KEY=VALUE の 3 行だけを受け付ける。source しない)
+SLACK_CHANNEL_PROD="" SLACK_CHANNEL_DEV="" SLACK_MENTION_USER_ID=""
+if [ -f "$SLACK_ENV" ]; then
+	while IFS='=' read -r key value; do
+		case "$key" in
+			SLACK_CHANNEL_PROD | SLACK_CHANNEL_DEV | SLACK_MENTION_USER_ID) printf -v "$key" '%s' "$value" ;;
+		esac
+	done < "$SLACK_ENV"
+fi
+export SLACK_CHANNEL_PROD SLACK_CHANNEL_DEV SLACK_MENTION_USER_ID
+if [ -z "$SLACK_CHANNEL_PROD" ] || [ -z "$SLACK_CHANNEL_DEV" ] || [ -z "$SLACK_MENTION_USER_ID" ]; then
+	log "失敗: $SLACK_ENV に SLACK_CHANNEL_PROD / SLACK_CHANNEL_DEV / SLACK_MENTION_USER_ID が無い"
+	osascript -e "display notification \"$SLACK_ENV が無い\" with title \"DMARC の自動チェック\"" 2> /dev/null || true
+	exit 1
+fi
+
+if ! SLACK_BOT_TOKEN="$(keychain t4v-revo-dmarc.slack-bot-token)" || [ -z "$SLACK_BOT_TOKEN" ]; then
+	SLACK_BOT_TOKEN=""
+	notify_failure "Slack の token" "キーチェーンに t4v-revo-dmarc.slack-bot-token が無い"
+	exit 1
+fi
+export SLACK_BOT_TOKEN
+
+# Claude の token は無くても集計と通知はできる (調査だけが「取れなかった」になる)
+CLAUDE_CODE_OAUTH_TOKEN="$(keychain t4v-revo-dmarc.claude-oauth-token || true)"
+export CLAUDE_CODE_OAUTH_TOKEN
+
+# 自動実行専用の worktree を origin/main に合わせる (T4V_REVO_DMARC_APP を指定した時は使わない)
+update_worktree() {
+	local i fetched=0
+	for i in 1 2 3; do
+		git -C "$REPO" fetch --quiet origin main && { fetched=1; break; }
+		log "git fetch に失敗 ($i 回目)。30 秒待ってやり直す"
+		sleep 30
+	done
+	if [ "$fetched" = 0 ]; then
+		if [ -d "$WORKTREE" ]; then
+			# 手元の worktree (前回の origin/main) のまま動かす。チェックそのものは飛ばさない
+			log "git fetch に失敗したので、worktree を更新せずに動かす: $(git -C "$WORKTREE" rev-parse --short HEAD)"
+			return 0
+		fi
+		notify_failure "git fetch" "one-more-time の origin/main を取得できず、worktree もまだ無い"
+		return 1
+	fi
+	if [ ! -d "$WORKTREE" ]; then
+		mkdir -p "$(dirname "$WORKTREE")"
+		if ! git -C "$REPO" worktree add --quiet --detach "$WORKTREE" origin/main; then
+			notify_failure "git worktree" "$WORKTREE を作れなかった"
+			return 1
+		fi
+	fi
+	if [ -n "$(git -C "$WORKTREE" status --porcelain --untracked-files=no)" ]; then
+		notify_failure "git worktree" "$WORKTREE に未コミットの変更がある。自動実行専用なので、変更を消してから再実行する"
+		return 1
+	fi
+	if ! git -C "$WORKTREE" checkout --quiet --detach origin/main; then
+		notify_failure "git checkout" "$WORKTREE を origin/main にできなかった"
+		return 1
+	fi
+	log "worktree: $(git -C "$WORKTREE" rev-parse --short HEAD)"
+}
+
+if [ -n "${T4V_REVO_DMARC_APP:-}" ]; then
+	log "app: $APP (T4V_REVO_DMARC_APP)"
+else
+	update_worktree || exit 1
+fi
+
+# 依存は package-lock.json が変わった時か、node_modules が無い時だけ入れ直す
+lock_sha="$(shasum -a 256 "$APP/package-lock.json" | cut -d' ' -f1)"
+if [ "$(cat "$APP/node_modules/.lock-sha" 2> /dev/null)" != "$lock_sha" ]; then
+	log "npm ci"
+	if ! (cd "$APP" && npm ci --no-audit --no-fund --loglevel=error); then
+		notify_failure "npm ci" "scripts/dmarc の依存を入れられなかった"
+		exit 1
+	fi
+	echo "$lock_sha" > "$APP/node_modules/.lock-sha"
+fi
+
+cd "$APP" || exit 1
+node dmarc-daily.ts "$@"
+rc=$?
+log "終了 (exit $rc)"
+if [ "$rc" != 0 ]; then
+	notify_failure "dmarc-daily.ts" "exit ${rc}。失敗を Slack に届けられなかったか、想定外の失敗"
+	exit "$rc"
+fi

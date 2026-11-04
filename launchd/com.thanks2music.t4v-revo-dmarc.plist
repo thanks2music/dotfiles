@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  bin/t4v-revo-dmarc-daily を毎朝 9:00 に実行する LaunchAgent のテンプレート。
+  Revolution のサイトのドメインの DMARC レポートを集計し、異常の時だけ Slack に知らせる
+  (本体は one-more-time の scripts/dmarc/dmarc-daily.ts)。
+
+  setup.sh の phase_launchd が __HOME__ を置き換えて ~/Library/LaunchAgents/ に生成し、
+  launchctl bootstrap で読み込む。ここを編集したら setup.sh を再実行する。
+
+  - StartCalendarInterval: スリープ中で時刻を過ぎた場合は、復帰したときに 1 回だけ実行される
+    (電源が切れていた分は実行されない。launchd.plist(5))
+  - ProcessType Background: 作業の邪魔をしないよう、CPU と I/O の優先度を下げる
+  - 標準出力: スクリプトは自分で日付ごとのログに書くので、ここに残るのは起動の失敗だけ
+-->
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.thanks2music.t4v-revo-dmarc</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>__HOME__/bin/t4v-revo-dmarc-daily</string>
+	</array>
+	<key>StartCalendarInterval</key>
+	<dict>
+		<key>Hour</key>
+		<integer>9</integer>
+		<key>Minute</key>
+		<integer>0</integer>
+	</dict>
+	<key>WorkingDirectory</key>
+	<string>__HOME__</string>
+	<key>ProcessType</key>
+	<string>Background</string>
+	<key>StandardOutPath</key>
+	<string>__HOME__/Library/Logs/t4v-revo-dmarc/launchd.log</string>
+	<key>StandardErrorPath</key>
+	<string>__HOME__/Library/Logs/t4v-revo-dmarc/launchd.log</string>
+</dict>
+</plist>
