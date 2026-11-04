@@ -36,9 +36,22 @@ brew bundle install --file=~/dotfiles/Brewfile.desktop    # 重量級・据置�
 brew bundle install --file=~/dotfiles/Brewfile.vscode     # VS Code 本体と拡張
 brew bundle install --file=~/dotfiles/Brewfile.mas        # Mac App Store のアプリ（先に App Store にサインイン）
 
-# Homebrewパッケージを更新
-brew update && brew upgrade
+# 手でまとめて更新する（Homebrew の formula と cask、App Store、pnpm のグローバル）
+brew-up        # Zed ではなく iTerm2 から実行する。cask の更新で起動中のアプリ（Zed・Docker）が終了するため
 ```
+
+### 更新の確認（LaunchAgent）
+
+`bin/brew-update-check` は `launchd/com.thanks2music.brew-update-check.plist` によって毎日 12:00 に実行される
+（`setup.sh` の `phase_launchd` が `~/Library/LaunchAgents` に生成して読み込む）。
+
+- 自動で更新するのは **formula だけ**で、電源につながっている時に限る。`terraform` はプロジェクトで版を固定しているので
+  対象外（`EXCLUDE`）。`brew-up` では更新する。代わりに `brew pin` を使わないこと（pin すると `brew-up` でも更新されない）
+- それ以外（cask、`mas outdated`、`pnpm outdated -g`、asdf の同じ系列の新しい版）は通知だけ。通知先は macOS の通知センター、
+  Todoist の「Private 🎧」のタスク 1 件（`~/.airc.local` に `TODOIST_API_TOKEN` が必要）、`.zshrc` が
+  `~/.cache/brew-update-check/motd` から表示する 1 行
+- ログ: `~/Library/Logs/brew-update-check/`。すぐ実行する:
+  `launchctl kickstart gui/$(id -u)/com.thanks2music.brew-update-check`（`-k` は付けない。実行中のものを kill するため）
 
 ## ファイル構造と命名規則
 
@@ -48,6 +61,8 @@ brew update && brew upgrade
 - `bin/` → `~/bin`にシンボリックリンクされる実行スクリプト
 - `config/` → `~/.config`にシンボリックリンクされる設定ファイル
 - `tools/` → 手で、または git から実行する補助スクリプト（`~/bin` にはリンクしない）
+- `launchd/` → LaunchAgent のテンプレート（`__HOME__` を置き換える）。`setup.sh` が `~/Library/LaunchAgents` に
+  生成して読み込む（plist には絶対パスが必要なので、symlink ではなく生成する）
 - `.gitattributes` → `config/zed/settings.json` に git の clean フィルタを割り当てる
   （`tools/git-filter-zed-settings.sh`。何をするかと既定値の変え方はスクリプトの冒頭を参照）
 
@@ -58,7 +73,8 @@ brew update && brew upgrade
 **ZSH:**
 1. `.zshenv` - zsh の**すべての**起動で読まれる（対話・非対話・スクリプト）。
    `.airc` → `.airc.local` を source するため、Claude Code の設定と API キーが
-   MCP サーバーのような子プロセスにも届く。重い処理と出力は書かない。
+   MCP サーバーのような子プロセスにも届く。`XDG_CONFIG_HOME` もここで export する（Homebrew が
+   `trust.json` をそこから読み、launchd のジョブにも要るため）。重い処理と出力は書かない。
 2. `.zprofile` - ログインシェルのみ。`brew shellenv` の唯一の設置箇所。
 3. `.zshrc` - 対話シェルのメイン設定
 4. `.aliasrc` - 共有エイリアス
@@ -279,5 +295,6 @@ zshlog    # ~/.zsh_history
 2. **PATH 管理**：asdf shims が pnpm グローバルパッケージより優先されます。
    vercel CLI などの pnpm ツールは asdf が管理していないため引き続き解決されます
 3. **バージョンマネージャー**：asdf のみ、かつ言語ランタイム専用です。rbenv/anyenv は削除しました
-4. **シェル統合**：Amazon QとVS Codeのシェル統合が自動的に読み込まれます
+4. **シェル統合**：VS Code のシェル統合が自動的に読み込まれます。Kiro CLI（旧 Amazon Q）は `~/.local/bin` の単体バイナリになり、
+   rc ファイルの pre/post ブロックは無くなりました
 5. **セキュリティ**：`.local`ファイルは決してコミットしないでください - 機密情報が含まれています

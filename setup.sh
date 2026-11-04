@@ -21,6 +21,10 @@ readonly dotfiles_dir="$HOME/dotfiles"
 readonly dotfiles_repo="https://github.com/thanks2music/dotfiles-rere.git"
 readonly stamp="$(date +%Y%m%d%H%M%S)"
 
+# 本スクリプトは bash なので dot.zshenv を読まない。brew bundle が `trusted: true` の信頼を書く trust.json の
+# 置き場所（${XDG_CONFIG_HOME}/homebrew、未設定なら ~/.homebrew）を、シェルや launchd のジョブと揃える。
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$local_dotconfig_dir}"
+
 declare -a FAILED=()
 declare -a SKIPPED=()
 
@@ -229,6 +233,51 @@ function phase_brewfile_global {
 	link "$dotfiles_dir/Brewfile" "$HOME/.Brewfile"
 }
 
+function phase_launchd {
+	if [ "$(uname)" != "Darwin" ]; then
+		info "macOS ではないため skip"
+		return 0
+	fi
+	# launchd/*.plist は __HOME__ を含むテンプレート。plist には絶対パスが必要なので、
+	# symlink ではなく ~/Library/LaunchAgents に生成し、読み込み直す。
+	local agents="$HOME/Library/LaunchAgents" uid src label dest key out rc=0
+	uid="$(id -u)"
+	mkdir -p "$agents" || return 1
+	while IFS= read -r src; do
+		[ -n "$src" ] || continue
+		dest="$agents/$(basename "$src")"
+		sed "s|__HOME__|$HOME|g" "$src" > "$dest.tmp" || { rc=1; continue; }
+		# 既存の正常な plist を壊さないよう、置き換える前に検査する。
+		if ! plutil -lint -s "$dest.tmp" || ! label="$(plutil -extract Label raw -o - "$dest.tmp")"; then
+			fail "plist が不正: $src"
+			rm -f "$dest.tmp"
+			rc=1
+			continue
+		fi
+		# launchd.plist(5) が「無ければ作る」としているのはログのファイルだけで、ディレクトリは先に作っておく。
+		for key in StandardOutPath StandardErrorPath; do
+			out="$(plutil -extract "$key" raw -o - "$dest.tmp" 2> /dev/null)" && { mkdir -p "$(dirname "$out")" || rc=1; }
+		done
+		# 内容が同じで読み込み済みなら何もしない。bootout は実行中のジョブ（brew upgrade の途中かもしれない）を止めるため。
+		if cmp -s "$dest.tmp" "$dest" && launchctl print "gui/$uid/$label" > /dev/null 2>&1; then
+			rm -f "$dest.tmp"
+			ok "$label"
+			continue
+		fi
+		mv "$dest.tmp" "$dest" || { rc=1; continue; }
+		launchctl bootout "gui/$uid/$label" 2> /dev/null || true
+		# bootout の直後は bootstrap が "Input/output error" で失敗することがあるので、1 回だけ待って再試行する。
+		if launchctl bootstrap "gui/$uid" "$dest" 2> /dev/null ||
+			{ sleep 2; launchctl bootstrap "gui/$uid" "$dest"; }; then
+			info "load    $label"
+		else
+			fail "launchctl bootstrap に失敗: $label"
+			rc=1
+		fi
+	done < <(find "$dotfiles_dir/launchd" -maxdepth 1 -name '*.plist')
+	return $rc
+}
+
 function phase_avengers {
 	local dir="${AVENGERS_DIR:-$HOME/work/dev/my-projects/avengers}"
 	local ssh_url="git@github.com:thanks2music/avengers.git"
@@ -292,6 +341,7 @@ phase 'Setup Zed settings'                   phase_zed
 phase 'Setup Homebrew'                       phase_homebrew
 phase 'Install packages (Brewfile)'          phase_brew_bundle
 phase 'Link ~/.Brewfile'                     phase_brewfile_global
+phase 'Setup LaunchAgents'                   phase_launchd
 phase 'Setup avengers (private AI config)'   phase_avengers
 
 topic 'summary'

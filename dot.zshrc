@@ -1,5 +1,3 @@
-# Kiro CLI pre block. Keep at the top of this file.
-[[ -f "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.pre.zsh" ]] && builtin source "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.pre.zsh"
 # Rcs --------------------------------------------------------------------
 # NOTE: ~/.zshrc.local はファイル末尾で 1 回だけ source する。以前は冒頭と末尾の
 #       2 箇所で読んでおり、PATH 追記など副作用のある行を書くと二重適用になった。
@@ -32,7 +30,7 @@ fi
 # Path -------------------------------------------------------------------
 export TERM=xterm-256color
 export LANG=ja_JP.UTF-8
-export XDG_CONFIG_HOME=$HOME/.config
+# XDG_CONFIG_HOME は dot.zshenv に移した（非対話の zsh にも要るため）
 export LS_COLORS='di=01;36'
 export GOPATH=$HOME/code
 export GO15VENDOREXPERIMENT=1
@@ -100,6 +98,8 @@ fi
 # NOTE: anyenv は削除した (Brewfile からも除去)。asdf の shim の上に重なって
 #       ruby / node の解決順を変えるため。バージョン管理は asdf に一本化する。
 
+# ~/.local/bin には kiro-cli も入る（2026-11-03 に standalone 版へ移行）。Kiro は移行時に rc ファイルの先頭へ
+# PATH の追記を足すが、ここで足しているので zsh では消した。再び足されていたら消してよい。
 if [ -d ${HOME}/.local ] ; then
   export PATH="$HOME/.local/bin:$PATH"
 fi
@@ -137,6 +137,13 @@ fi
 
 # VS Code ----------------------------------------------------------------------
 [[ "$TERM_PROGRAM" == "vscode" ]] && type code > /dev/null 2>&1 && . "$(code --locate-shell-integration-path zsh)"
+
+# Package updates --------------------------------------------------------------
+# bin/brew-update-check（launchd が毎日 12:00 に実行）が書く 1 行を表示する。更新が無ければ空ファイル。
+#   NOTE: p10k の instant prompt より前に置く。後ろで出力すると、色が落ちて p10k が警告を出す
+#         （p10k の README は、出力するだけの処理は preamble より前へ移すよう勧めている）。
+#         $(<file) は zsh の組み込みで fork しないので、起動時間はほぼ増えない。
+() { [[ -s $1 ]] && print -r -- "$(<$1)" } "${XDG_CACHE_HOME:-$HOME/.cache}/brew-update-check/motd"
 
 # Powerlevel10k ----------------------------------------------------------------
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
@@ -543,5 +550,3 @@ typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 # zoxide
 type zoxide > /dev/null 2>&1 && eval "$(zoxide init zsh)"
 
-# Kiro CLI post block. Keep at the bottom of this file.
-[[ -f "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.post.zsh" ]] && builtin source "${HOME}/Library/Application Support/kiro-cli/shell/zshrc.post.zsh"

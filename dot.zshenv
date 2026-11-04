@@ -34,6 +34,11 @@
 #   rc ファイルを一切読まない。デスクトップアプリ版 Claude Code から MCP を使う場合は
 #   本ファイルでも解決しないため、別途確認が必要。
 
+# XDG_CONFIG_HOME は非対話の zsh にも要る（以前は dot.zshrc にあった）。Homebrew は信頼した tap の一覧
+# （trust.json）を ${XDG_CONFIG_HOME}/homebrew から読み、未設定なら ~/.homebrew を見る。
+# そのため launchd で動く bin/brew-update-check では、信頼済みの formula まで拒否されていた（2026-11-01 実測）。
+export XDG_CONFIG_HOME="$HOME/.config"
+
 # AI/LLM 関連の設定。base → local の順に読む（他の *rc と同じく local が後で勝つ）。
 #
 #   .airc       — CLAUDE_CODE_MAX_OUTPUT_TOKENS 等。Claude Code とその子プロセス向けなので
