@@ -25,7 +25,7 @@ Machine-specific settings and secrets go in `*.local` files, which git ignores.
 Clone first, then run the script.
 
 ```
-git clone https://github.com/thanks2music/dotfiles-rere.git ~/dotfiles
+git clone https://github.com/thanks2music/dotfiles.git ~/dotfiles
 bash ~/dotfiles/setup.sh
 ```
 

@@ -2,7 +2,7 @@
 #
 # setup.sh — 新しい Mac に開発環境を構築する
 #
-#   使い方: git clone https://github.com/thanks2music/dotfiles-rere.git ~/dotfiles
+#   使い方: git clone https://github.com/thanks2music/dotfiles.git ~/dotfiles
 #           bash ~/dotfiles/setup.sh
 #
 #   NOTE: パイプ実行 (curl | bash) は推奨しない。実行前に中身を確認できず、
@@ -18,7 +18,7 @@ set -uo pipefail
 readonly local_bin_dir="$HOME/bin"
 readonly local_dotconfig_dir="$HOME/.config"
 readonly dotfiles_dir="$HOME/dotfiles"
-readonly dotfiles_repo="https://github.com/thanks2music/dotfiles-rere.git"
+readonly dotfiles_repo="https://github.com/thanks2music/dotfiles.git"
 readonly stamp="$(date +%Y%m%d%H%M%S)"
 
 # 本スクリプトは bash なので dot.zshenv を読まない。brew bundle が `trusted: true` の信頼を書く trust.json の

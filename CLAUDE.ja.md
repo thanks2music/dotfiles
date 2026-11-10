@@ -11,7 +11,7 @@
 ### 初回セットアップ
 ```bash
 # 新規インストール（clone してから実行する。curl をパイプで bash に渡さない）
-git clone https://github.com/thanks2music/dotfiles-rere.git ~/dotfiles
+git clone https://github.com/thanks2music/dotfiles.git ~/dotfiles
 bash ~/dotfiles/setup.sh
 
 # ローカルセットアップ（リポジトリが既に存在する場合）
