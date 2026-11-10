@@ -35,3 +35,6 @@ node_modules/
 
 # MCP ツールがカレントディレクトリに吐く作業ファイル（どのリポでも発生する）
 .playwright-mcp/
+
+# framework プラグイン（/framework:<slug>）の単独の実行結果。参画先などの情報を含みうる
+docs/framework/

@@ -11,7 +11,7 @@ This is a personal dotfiles repository for macOS (Apple Silicon) based on [shiwa
 ### Initial Setup
 ```bash
 # Fresh installation (clone first, then run — do NOT pipe curl into bash)
-git clone https://github.com/thanks2music/dotfiles-rere.git ~/dotfiles
+git clone https://github.com/thanks2music/dotfiles.git ~/dotfiles
 bash ~/dotfiles/setup.sh
 
 # Local setup (if repository already exists)
