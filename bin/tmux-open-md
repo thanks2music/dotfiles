@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# tmux-open-md: ペインに表示された .md のパスを fzf で選び、Typora で開く
+#
+# tmux の display-popup から呼ぶ（dot.tmux.darwin.conf の prefix + O）。
+#   $1: 対象ペインの ID (#{pane_id})
+#   $2: 対象ペインの作業ディレクトリ (#{pane_current_path})
+#
+# - capture-pane -J で折り返しをつなぎ、画面外を含む約 2000 行から .md のパスを抜き出す
+# - 新しく表示されたものを先頭に並べる
+# - パスが作業ディレクトリから見つからない時 (ファイル名だけの表示など) は、
+#   Git のルート (Git 外なら作業ディレクトリ) の下から同名のファイルを探す
+set -euo pipefail
+
+pane="${1:?pane id is required}"
+dir="${2:?pane current path is required}"
+cd "$dir"
+
+path=$(tmux capture-pane -p -J -S -2000 -t "$pane" \
+	| grep -oE '[~/A-Za-z0-9._-][^[:space:]()`"'\'']*\.md' \
+	| awk '{ line[NR] = $0 } END { for (i = NR; i > 0; i--) if (!seen[line[i]]++) print line[i] }' \
+	| fzf --prompt='Typora> ' --no-sort) || exit 0
+
+path="${path/#\~/$HOME}"
+if [[ ! -e $path ]]; then
+	top=$(git rev-parse --show-toplevel 2>/dev/null || echo "$dir")
+	path=$(find "$top" -name "${path##*/}" -not -path '*/.git/*' -not -path '*/node_modules/*' 2>/dev/null | head -1)
+fi
+
+if [[ -n $path && -e $path ]]; then
+	open -a Typora "$path"
+else
+	tmux display-message "tmux-open-md: 見つかりません: ${path:-?}"
+fi
