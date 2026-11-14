@@ -2,8 +2,10 @@
 # tmux-open-md: ペインや Claude Code の返答に出た .md のパスを fzf で選び、Typora で開く
 #
 # tmux の display-popup から呼ぶ（dot.tmux.darwin.conf の prefix + O）。
-#   $1: 対象ペインの ID (#{pane_id})
-#   $2: 対象ペインの作業ディレクトリ (#{pane_current_path})
+#   $1: 対象ペインの ID（省略時は、キーを押した時のアクティブなペイン）
+#   $2: 対象ペインの作業ディレクトリ（省略時は、そのペインの作業ディレクトリ）
+# display-popup はコマンド部分の #{...} を展開しないため、バインドからは引数を渡さない。
+# ポップアップを開いてもアクティブなペインは変わらないので、中で tmux に問い合わせて取る。
 #
 # 候補は次の順に並べる（重複は除く）:
 #   1. ペインの表示（新しい行が先）。Claude Code は全画面表示 (alternate screen) で動くため、
@@ -17,8 +19,8 @@
 # デバッグ: 毎回 ~/.local/state/tmux-open-md/debug.log に上書きで記録する。
 set -uo pipefail
 
-pane="${1:?pane id is required}"
-dir="${2:?pane current path is required}"
+pane="${1:-$(tmux display-message -p '#{pane_id}')}"
+dir="${2:-$(tmux display-message -p -t "$pane" '#{pane_current_path}')}"
 
 log_dir="$HOME/.local/state/tmux-open-md"
 log="$log_dir/debug.log"
