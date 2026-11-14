@@ -2,19 +2,21 @@
 # tmux-open-md: ペインや Claude Code の返答に出た .md のパスを fzf で選び、Typora で開く
 #
 # tmux の display-popup から呼ぶ（dot.tmux.darwin.conf の prefix + O）。
-#   $1: 対象ペインの ID（省略時は、キーを押した時のアクティブなペイン）
-#   $2: 対象ペインの作業ディレクトリ（省略時は、そのペインの作業ディレクトリ）
-# display-popup はコマンド部分の #{...} を展開しないため、バインドからは引数を渡さない。
-# ポップアップを開いてもアクティブなペインは変わらないので、中で tmux に問い合わせて取る。
+# 引数は取らない。対象のペインは、キーを押した時のアクティブなペインを tmux に問い合わせて取る
+# (display-popup はコマンド部分の #{...} を展開しないため、バインドからは渡せない。
+#  ポップアップを開いてもアクティブなペインは変わらない)。
+# 手で試す時だけ、$1 にペイン ID、$2 に作業ディレクトリを渡して上書きできる。
 #
 # 候補は次の順に並べる（重複は除く）:
 #   1. ペインの表示（新しい行が先）。Claude Code は全画面表示 (alternate screen) で動くため、
 #      tmux から読めるのは押した時点で画面に映っている範囲だけになる
 #   2. Claude Code のセッション記録（~/.claude/projects/<作業ディレクトリ>/ の最新の .jsonl）
-#      にある、Claude の返答の本文（新しいものが先）。画面から消えたパスはここで拾う
+#      にある、Claude の返答の本文（新しいものが先）。画面から消えたパスはここで拾う。
+#      読むのは記録の末尾 500 行だけなので、長い会話の古い返答に出たパスは候補に入らない
 #
-# パスが作業ディレクトリから見つからない時 (ファイル名だけの表示など) は、
-# Git のルート (Git 外なら作業ディレクトリ) の下から同名のファイルを探す。
+# パスが作業ディレクトリから見つからない時 (ファイル名だけの表示など) は、同名のファイルを探す。
+# Git の中ならリポジトリのファイル (未追跡を含み、ignore されたものは除く) から、
+# Git の外なら作業ディレクトリから 3 階層までを探す。
 #
 # デバッグ: 毎回 ~/.local/state/tmux-open-md/debug.log に上書きで記録する。
 set -uo pipefail
@@ -32,6 +34,13 @@ pattern='[~/A-Za-z0-9._-][^[:space:]()`"'\''|]*\.md'
 newest_first() { awk '{ line[NR] = $0 } END { for (i = NR; i > 0; i--) print line[i] }'; }
 
 debug "pane=$pane dir=$dir"
+for cmd in fzf jq; do
+	if ! command -v "$cmd" >/dev/null; then
+		debug "$cmd が PATH にない: PATH=$PATH"
+		tmux display-message "tmux-open-md: $cmd が見つかりません (ログ: $log)"
+		exit 1
+	fi
+done
 cd "$dir" || { tmux display-message "tmux-open-md: cd できません: $dir"; exit 1; }
 
 from_pane=$(tmux capture-pane -p -J -S -2000 -t "$pane" | grep -oE "$pattern" | newest_first)
@@ -60,10 +69,22 @@ debug "selected=$path"
 
 path="${path/#\~/$HOME}"
 if [[ ! -e $path ]]; then
-	top=$(git rev-parse --show-toplevel 2>/dev/null || echo "$dir")
-	path=$(find "$top" -name "${path##*/}" -not -path '*/.git/*' -not -path '*/node_modules/*' 2>/dev/null | head -1)
-	debug "resolved (find under $top)=${path:-なし}"
+	name="${path##*/}"
+	if top=$(git rev-parse --show-toplevel 2>/dev/null); then
+		rel=$(git -C "$top" ls-files --cached --others --exclude-standard \
+			| awk -F/ -v n="$name" '$NF == n { print; exit }')
+		path="${rel:+$top/$rel}"
+		debug "resolved (git ls-files in $top)=${path:-なし}"
+	else
+		# -name は glob として解釈されるので、ファイル名の glob 文字をエスケープする
+		glob=$(printf '%s' "$name" | sed 's/[][*?\\]/\\&/g')
+		path=$(find "$dir" -maxdepth 3 -name "$glob" -not -path '*/.git/*' -not -path '*/node_modules/*' 2>/dev/null | head -1)
+		debug "resolved (find under $dir, maxdepth 3)=${path:-なし}"
+	fi
 fi
+
+# ペインの内容は信頼できない入力なので、- で始まる値が open のオプションにならないようにする
+[[ -n $path && $path != /* ]] && path="./$path"
 
 if [[ -n $path && -e $path ]]; then
 	debug "open -a Typora $path"

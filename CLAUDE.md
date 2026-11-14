@@ -145,6 +145,7 @@ Ctrl-t n - New window with current directory
 Ctrl-t e - New window with nvim
 Ctrl-t v - Vertical split
 Ctrl-t h - Horizontal split
+Ctrl-t O - Pick a .md path shown in the pane (or in recent Claude Code replies) and open it in Typora (macOS only, bin/tmux-open-md)
 ```
 
 ### Git Workflows (with fzf integration)
