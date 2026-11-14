@@ -1,33 +1,71 @@
 #!/usr/bin/env bash
-# tmux-open-md: ペインに表示された .md のパスを fzf で選び、Typora で開く
+# tmux-open-md: ペインや Claude Code の返答に出た .md のパスを fzf で選び、Typora で開く
 #
 # tmux の display-popup から呼ぶ（dot.tmux.darwin.conf の prefix + O）。
 #   $1: 対象ペインの ID (#{pane_id})
 #   $2: 対象ペインの作業ディレクトリ (#{pane_current_path})
 #
-# - capture-pane -J で折り返しをつなぎ、画面外を含む約 2000 行から .md のパスを抜き出す
-# - 新しく表示されたものを先頭に並べる
-# - パスが作業ディレクトリから見つからない時 (ファイル名だけの表示など) は、
-#   Git のルート (Git 外なら作業ディレクトリ) の下から同名のファイルを探す
-set -euo pipefail
+# 候補は次の順に並べる（重複は除く）:
+#   1. ペインの表示（新しい行が先）。Claude Code は全画面表示 (alternate screen) で動くため、
+#      tmux から読めるのは押した時点で画面に映っている範囲だけになる
+#   2. Claude Code のセッション記録（~/.claude/projects/<作業ディレクトリ>/ の最新の .jsonl）
+#      にある、Claude の返答の本文（新しいものが先）。画面から消えたパスはここで拾う
+#
+# パスが作業ディレクトリから見つからない時 (ファイル名だけの表示など) は、
+# Git のルート (Git 外なら作業ディレクトリ) の下から同名のファイルを探す。
+#
+# デバッグ: 毎回 ~/.local/state/tmux-open-md/debug.log に上書きで記録する。
+set -uo pipefail
 
 pane="${1:?pane id is required}"
 dir="${2:?pane current path is required}"
-cd "$dir"
 
-path=$(tmux capture-pane -p -J -S -2000 -t "$pane" \
-	| grep -oE '[~/A-Za-z0-9._-][^[:space:]()`"'\'']*\.md' \
-	| awk '{ line[NR] = $0 } END { for (i = NR; i > 0; i--) if (!seen[line[i]]++) print line[i] }' \
-	| fzf --prompt='Typora> ' --no-sort) || exit 0
+log_dir="$HOME/.local/state/tmux-open-md"
+log="$log_dir/debug.log"
+mkdir -p "$log_dir"
+: >"$log"
+debug() { printf '%s %s\n' "$(date '+%H:%M:%S')" "$*" >>"$log"; }
+
+pattern='[~/A-Za-z0-9._-][^[:space:]()`"'\''|]*\.md'
+newest_first() { awk '{ line[NR] = $0 } END { for (i = NR; i > 0; i--) print line[i] }'; }
+
+debug "pane=$pane dir=$dir"
+cd "$dir" || { tmux display-message "tmux-open-md: cd できません: $dir"; exit 1; }
+
+from_pane=$(tmux capture-pane -p -J -S -2000 -t "$pane" | grep -oE "$pattern" | newest_first)
+debug "from_pane: $(printf '%s' "$from_pane" | grep -c . || true) 件"
+
+transcript_dir="$HOME/.claude/projects/$(printf '%s' "$dir" | sed 's/[^A-Za-z0-9]/-/g')"
+transcript=$(ls -t "$transcript_dir"/*.jsonl 2>/dev/null | head -1)
+from_transcript=""
+if [[ -n $transcript ]]; then
+	from_transcript=$(tail -n 500 "$transcript" \
+		| jq -r 'select(.type == "assistant") | .message.content[]? | select(.type == "text") | .text' 2>>"$log" \
+		| grep -oE "$pattern" | newest_first)
+fi
+debug "transcript=${transcript:-なし} ($transcript_dir)"
+debug "from_transcript: $(printf '%s' "$from_transcript" | grep -c . || true) 件"
+
+candidates=$(printf '%s\n%s\n' "$from_pane" "$from_transcript" | awk 'NF && !seen[$0]++')
+if [[ -z $candidates ]]; then
+	debug "候補なし"
+	tmux display-message "tmux-open-md: .md のパスが見つかりません (ログ: $log)"
+	exit 0
+fi
+
+path=$(printf '%s\n' "$candidates" | fzf --prompt='Typora> ' --no-sort) || { debug "fzf: 選択なし"; exit 0; }
+debug "selected=$path"
 
 path="${path/#\~/$HOME}"
 if [[ ! -e $path ]]; then
 	top=$(git rev-parse --show-toplevel 2>/dev/null || echo "$dir")
 	path=$(find "$top" -name "${path##*/}" -not -path '*/.git/*' -not -path '*/node_modules/*' 2>/dev/null | head -1)
+	debug "resolved (find under $top)=${path:-なし}"
 fi
 
 if [[ -n $path && -e $path ]]; then
+	debug "open -a Typora $path"
 	open -a Typora "$path"
 else
-	tmux display-message "tmux-open-md: 見つかりません: ${path:-?}"
+	tmux display-message "tmux-open-md: ファイルが見つかりません (ログ: $log)"
 fi
