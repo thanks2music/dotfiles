@@ -71,7 +71,9 @@ path="${path/#\~/$HOME}"
 if [[ ! -e $path ]]; then
 	name="${path##*/}"
 	if top=$(git rev-parse --show-toplevel 2>/dev/null); then
-		rel=$(git -C "$top" ls-files --cached --others --exclude-standard \
+		# ペインの作業ディレクトリは信頼できないリポジトリのこともあるので、
+		# リポジトリの設定からコマンドを動かす core.fsmonitor を無効にして実行する
+		rel=$(git -c core.fsmonitor=false -C "$top" ls-files --cached --others --exclude-standard \
 			| awk -F/ -v n="$name" '$NF == n { print; exit }')
 		path="${rel:+$top/$rel}"
 		debug "resolved (git ls-files in $top)=${path:-なし}"
