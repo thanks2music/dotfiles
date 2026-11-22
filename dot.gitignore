@@ -38,3 +38,5 @@ node_modules/
 
 # framework プラグイン（/framework:<slug>）の単独の実行結果。参画先などの情報を含みうる
 docs/framework/
+
+**/.claude/settings.local.json

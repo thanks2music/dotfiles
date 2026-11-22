@@ -191,7 +191,7 @@ brew "zstd"
 # 意図的に外した cask（2026-10-27 の棚卸し）。Pro にはまだ入っているので `brew bundle dump` には出てくるが、
 #   差分を反映するときに戻さない。使っているかは `bash tools/brewfile-usage.sh` で確かめた。
 #   .app を削除済み:      bartender clipy dbeaver-community github gitify gyazo keyboard-cleaner poedit smartsvn
-#   1 年以上使っていない: bruno deepl flutter（普段は fvm 経由） switchhosts typora whatsapp
+#   1 年以上使っていない: bruno deepl flutter（普段は fvm 経由） switchhosts whatsapp（typora は 2026-11-12 に戻した）
 #   使っていない:         divvy ghostty hammerspoon ip-in-menu-bar licecap onyx pgadmin4 teamviewer
 #   （以上は 2026-11-01 に Pro からもアンインストールした。daisydisk は有料版を買っていたので Brewfile.desktop へ移した）
 #   使っているアプリの設定から参照していないフォント: font-iosevka-nerd-font font-monoid-nerd-font
@@ -247,6 +247,7 @@ cask "tabby"
 cask "tableplus"
 cask "todoist-app"
 cask "typeless"
+cask "typora" # 2026-11-12 に戻した。MWeb から乗り換えを試す
 cask "vlc"
 cask "zed"
 cask "zoom"
