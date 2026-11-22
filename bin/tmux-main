@@ -1,0 +1,99 @@
+#!/bin/bash
+#
+# tmux-main: attach to the "main" tmux session, building it first if it does not exist.
+#
+#   tmux-main          attach (from inside tmux: switch to it). Run by the `t` alias.
+#   tmux-main --auto   attach only when no other client shows main. Run by .zshrc when
+#                      iTerm2 opens a shell, so a second iTerm2 tab stays a plain zsh.
+#   tmux-main <args>   any other arguments go to tmux as they are (`t ls`, `t new -s x`).
+#
+# A main session that already exists is attached as it is, even if windows or panes were
+# closed by hand: rebuilding would kill windows that may still run Claude Code.
+# To start over, close main (`tk main`) and run `t`.
+#
+# Windows and panes of a new main session (splits are even):
+#   1:Revo      one-more-time | one-more-time
+#   2:JARVIS    jarvis        | avengers
+#   3:VoiStock  koetabi        | oshitabi
+#               internal-tools | oshitabi/survey
+
+set -eu
+
+session=main
+
+command -v tmux >/dev/null 2>&1 || { echo 'tmux-main: tmux not found' >&2; exit 1; }
+
+auto=false
+if [[ ${1:-} == --auto ]]; then
+  auto=true
+elif (( $# > 0 )); then
+  exec tmux "$@"
+fi
+
+if $auto; then
+  # list-clients prints one line per client attached to main; empty means nobody shows it.
+  if tmux has-session -t "=$session" 2>/dev/null &&
+     [[ -n $(tmux list-clients -t "=$session" 2>/dev/null) ]]; then
+    exit 0
+  fi
+fi
+
+if ! tmux has-session -t "=$session" 2>/dev/null; then
+  omt=$HOME/work/dev/my-projects/one-more-time
+  jarvis=$HOME/work/dev/my-projects/jarvis
+  avengers=$HOME/work/dev/my-projects/avengers
+  vs=$HOME/work/voistock/projects
+
+  # A directory that no longer exists would make tmux fall back to the start directory
+  # silently, so the pane would open in the wrong place without telling anyone.
+  for d in "$omt" "$jarvis" "$avengers" "$vs/koetabi" "$vs/improvement/internal-tools" \
+           "$vs/oshitabi" "$vs/oshitabi/survey"; do
+    [[ -d $d ]] || echo "tmux-main: $d does not exist; the pane opens in \$HOME" >&2
+  done
+
+  # A detached session starts at 80x24 and the splits are made at that size. Give it the
+  # size of the terminal that is about to attach, so the halves stay even after attaching.
+  size=()
+  if read -r rows cols < <(stty size 2>/dev/null) && [[ -n ${cols:-} ]]; then
+    size=(-x "$cols" -y "$rows")
+  fi
+
+  # The session is built under a temporary name and renamed to main only when it is
+  # complete. iTerm2 restores several windows at once, so two shells can get here
+  # together: the one that renames second fails, drops its copy and uses the first one's
+  # main. A build that fails halfway is killed by the trap instead of being left as main.
+  build=main-build-$$
+  trap 'tmux kill-session -t "=$build" 2>/dev/null || true' EXIT
+
+  # Panes are addressed by the ids tmux prints (-P -F), not by index, so base-index and
+  # pane-base-index do not matter. A window created with -n keeps its name: tmux turns
+  # automatic-rename off for it.
+  revo=$(tmux new-session -d -s "$build" ${size[@]+"${size[@]}"} -n Revo -c "$omt" -P -F '#{pane_id}')
+  tmux split-window -h -t "$revo" -c "$omt"
+
+  jarvis_left=$(tmux new-window -d -t "=$build:" -n JARVIS -c "$jarvis" -P -F '#{pane_id}')
+  tmux split-window -h -t "$jarvis_left" -c "$avengers"
+
+  koetabi=$(tmux new-window -d -t "=$build:" -n VoiStock -c "$vs/koetabi" -P -F '#{pane_id}')
+  oshitabi=$(tmux split-window -h -t "$koetabi" -c "$vs/oshitabi" -P -F '#{pane_id}')
+  tmux split-window -v -t "$koetabi" -c "$vs/improvement/internal-tools"
+  tmux split-window -v -t "$oshitabi" -c "$vs/oshitabi/survey"
+
+  tmux select-window -t "$revo"
+  tmux select-pane -t "$revo"
+
+  if tmux rename-session -t "=$build" "$session" 2>/dev/null; then
+    trap - EXIT
+  else
+    # Another shell built main first, so this copy is dropped here (the exec below would
+    # skip the trap). With --auto that shell is the one attaching; this one stays a zsh.
+    tmux kill-session -t "=$build" 2>/dev/null || true
+    trap - EXIT
+    $auto && exit 0
+  fi
+fi
+
+if [[ -n ${TMUX:-} ]]; then
+  exec tmux switch-client -t "=$session"
+fi
+exec tmux attach-session -t "=$session"

@@ -138,6 +138,16 @@ fi
 # VS Code ----------------------------------------------------------------------
 [[ "$TERM_PROGRAM" == "vscode" ]] && type code > /dev/null 2>&1 && . "$(code --locate-shell-integration-path zsh)"
 
+# tmux (auto-attach in iTerm2) -------------------------------------------------
+# iTerm2 で開いたシェルは、tmux の main セッションに自動で入る（bin/tmux-main。無ければ作る）。
+#   ほかの画面が main を表示中なら入らない。2 つ目以降の iTerm2 タブは普通の zsh のまま。
+#   Zed・VS Code の端末は TERM_PROGRAM が違うので入らない。tmux の中では TERM_PROGRAM=tmux。
+#   exec しないので、detach すると普通の zsh に戻る（続きの .zshrc はそこで読まれる）。
+#   NOTE: p10k の instant prompt より前に置く。tmux が端末を占有するため、後ろだと p10k が警告を出す。
+if [[ -o interactive && -z $TMUX && $TERM_PROGRAM == iTerm.app ]] && (( $+commands[tmux-main] )); then
+  tmux-main --auto
+fi
+
 # Package updates --------------------------------------------------------------
 # bin/brew-update-check（launchd が毎日 12:00 に実行）が書く 1 行を表示する。更新が無ければ空ファイル。
 #   NOTE: p10k の instant prompt より前に置く。後ろで出力すると、色が落ちて p10k が警告を出す
