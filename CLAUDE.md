@@ -302,3 +302,17 @@ zshlog    # ~/.zsh_history
 4. **Shell Integration**: The VS Code shell integration is loaded automatically. Kiro CLI (formerly Amazon Q)
    is a standalone binary in `~/.local/bin` and no longer has pre/post blocks in the rc files
 5. **Security**: Never commit `.local` files - they contain sensitive information
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in GitHub Issues (thanks2music/dotfiles), via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default five-role vocabulary (needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: one `GLOSSARY.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
