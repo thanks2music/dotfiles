@@ -44,7 +44,8 @@ alias git-tags-top10='git for-each-ref --sort=-creatordate --format="%(refname:s
 alias r='restore-git-files' # hide 'r' which is zsh's built-in command
 
 # Tmux
-alias t='tmux'
+## main セッションに attach（無ければ Revo / JARVIS / VoiStock の配置で作る。bin/tmux-main）
+alias t='tmux-main'
 ## 新しいセッションを作成
 alias tn='tmux new -s'
 ## セッションをKill
