@@ -39,4 +39,5 @@ node_modules/
 # framework プラグイン（/framework:<slug>）の単独の実行結果。参画先などの情報を含みうる
 docs/framework/
 
+# Claude Code のマシン固有の設定（ローカルで許可した権限など）。どのリポジトリでも commit しない
 **/.claude/settings.local.json
