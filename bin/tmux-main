@@ -5,6 +5,7 @@
 #   tmux-main          attach (from inside tmux: switch to it). Run by the `t` alias.
 #   tmux-main --auto   attach only when no other client shows main. Run by .zshrc when
 #                      iTerm2 opens a shell, so a second iTerm2 tab stays a plain zsh.
+#   tmux-main <args>   any other arguments go to tmux as they are (`t ls`, `t new -s x`).
 #
 # A main session that already exists is attached as it is, even if windows or panes were
 # closed by hand: rebuilding would kill windows that may still run Claude Code.
@@ -22,7 +23,14 @@ session=main
 
 command -v tmux >/dev/null 2>&1 || { echo 'tmux-main: tmux not found' >&2; exit 1; }
 
+auto=false
 if [[ ${1:-} == --auto ]]; then
+  auto=true
+elif (( $# > 0 )); then
+  exec tmux "$@"
+fi
+
+if $auto; then
   # list-clients prints one line per client attached to main; empty means nobody shows it.
   if tmux has-session -t "=$session" 2>/dev/null &&
      [[ -n $(tmux list-clients -t "=$session" 2>/dev/null) ]]; then
@@ -50,22 +58,39 @@ if ! tmux has-session -t "=$session" 2>/dev/null; then
     size=(-x "$cols" -y "$rows")
   fi
 
+  # The session is built under a temporary name and renamed to main only when it is
+  # complete. iTerm2 restores several windows at once, so two shells can get here
+  # together: the one that renames second fails, drops its copy and uses the first one's
+  # main. A build that fails halfway is killed by the trap instead of being left as main.
+  build=main-build-$$
+  trap 'tmux kill-session -t "=$build" 2>/dev/null || true' EXIT
+
   # Panes are addressed by the ids tmux prints (-P -F), not by index, so base-index and
   # pane-base-index do not matter. A window created with -n keeps its name: tmux turns
   # automatic-rename off for it.
-  revo=$(tmux new-session -d -s "$session" ${size[@]+"${size[@]}"} -n Revo -c "$omt" -P -F '#{pane_id}')
+  revo=$(tmux new-session -d -s "$build" ${size[@]+"${size[@]}"} -n Revo -c "$omt" -P -F '#{pane_id}')
   tmux split-window -h -t "$revo" -c "$omt"
 
-  jarvis_left=$(tmux new-window -d -t "=$session:" -n JARVIS -c "$jarvis" -P -F '#{pane_id}')
+  jarvis_left=$(tmux new-window -d -t "=$build:" -n JARVIS -c "$jarvis" -P -F '#{pane_id}')
   tmux split-window -h -t "$jarvis_left" -c "$avengers"
 
-  koetabi=$(tmux new-window -d -t "=$session:" -n VoiStock -c "$vs/koetabi" -P -F '#{pane_id}')
+  koetabi=$(tmux new-window -d -t "=$build:" -n VoiStock -c "$vs/koetabi" -P -F '#{pane_id}')
   oshitabi=$(tmux split-window -h -t "$koetabi" -c "$vs/oshitabi" -P -F '#{pane_id}')
   tmux split-window -v -t "$koetabi" -c "$vs/improvement/internal-tools"
   tmux split-window -v -t "$oshitabi" -c "$vs/oshitabi/survey"
 
   tmux select-window -t "$revo"
   tmux select-pane -t "$revo"
+
+  if tmux rename-session -t "=$build" "$session" 2>/dev/null; then
+    trap - EXIT
+  else
+    # Another shell built main first, so this copy is dropped here (the exec below would
+    # skip the trap). With --auto that shell is the one attaching; this one stays a zsh.
+    tmux kill-session -t "=$build" 2>/dev/null || true
+    trap - EXIT
+    $auto && exit 0
+  fi
 fi
 
 if [[ -n ${TMUX:-} ]]; then
