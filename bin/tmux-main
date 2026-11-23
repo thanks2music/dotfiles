@@ -62,7 +62,8 @@ if ! tmux has-session -t "=$session" 2>/dev/null; then
     source "$layout"
   fi
   if (( ${#names[@]} == 0 )); then
-    window "${SHELL##*/}" "$HOME"
+    window "${SHELL:-sh}" "$HOME"
+    names[0]=${names[0]##*/}
   fi
 
   # A detached session starts at 80x24 and the splits are made at that size. Give it the
