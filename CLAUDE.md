@@ -123,8 +123,9 @@ interactive shells, so anything defined there never reaches a fresh non-interact
 ### Tmux Sessions
 
 iTerm2 attaches to the `main` session on launch (`dot.zshrc` runs `bin/tmux-main --auto`).
-It is built with windows `1:Revo`, `2:JARVIS` and `3:VoiStock` when it does not exist, and
-attached as it is when it does. A second iTerm2 tab, Zed and VS Code stay plain zsh.
+When it does not exist, it is built from the windows listed in `~/.tmux-main.local`
+(`dot.tmux-main.local`, not tracked; see `dot.tmux-main.local.example`).
+When it exists, it is attached as it is. A second iTerm2 tab, Zed and VS Code stay plain zsh.
 See `GLOSSARY.md` for "main session" and "window" (the owner's "tab" is a tmux window).
 
 ```bash

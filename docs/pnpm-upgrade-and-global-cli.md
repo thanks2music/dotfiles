@@ -11,14 +11,14 @@
 | `PNPM_HOME` | `~/Library/pnpm` |
 | Node.js | asdf（`dot.tool-versions` の `nodejs 26.3.0`） |
 | pnpm で入れたグローバルの CLI | `vercel`、`@usebruno/cli`（`bru`） |
-| プロジェクトの pnpm | 各プロジェクトの `package.json` の `packageManager` で固定する（例: revolution は `pnpm@10.11.0`） |
+| プロジェクトの pnpm | 各プロジェクトの `package.json` の `packageManager` で固定する（例: `pnpm@10.11.0`） |
 
 ## 方針: pnpm は asdf で管理しない
 
 asdf で管理するのは言語ランタイムだけ（`dot.tool-versions` の冒頭のとおり）。pnpm は入れない。
 
 - **プロジェクトごとの版は、pnpm 自身が切り替える。** `packageManager` を読んで、その版をダウンロードして使う。
-  revolution の中で `pnpm --version` を実行すると `10.11.0` が返る。ダウンロードした版は `$PNPM_HOME/.tools/pnpm/<版>` に溜まる。
+  `packageManager` が `pnpm@10.11.0` のプロジェクトの中で `pnpm --version` を実行すると `10.11.0` が返る。ダウンロードした版は `$PNPM_HOME/.tools/pnpm/<版>` に溜まる。
   asdf でも管理すると、pnpm の版の正本が `.tool-versions` と `packageManager` の 2 つになる。CI と Vercel が読むのは `packageManager` の方
 - **pnpm 12 は Node.js の要らない単体の実行ファイル**（`pnpm self-update` で入れた場合。公式の [Compatibility](https://pnpm.io/installation#compatibility)）。
   asdf で Node.js の版を切り替えても pnpm には影響しない

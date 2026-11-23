@@ -124,5 +124,6 @@
   smudge = git-lfs smudge -- %f
 [init]
 	defaultBranch = main
-[includeIf "gitdir:~/work/voistock/"]
-	path = ~/.gitconfig-voistock
+# マシン固有の設定（ディレクトリ別の includeIf など）。dot.gitconfig.local は git の管理外
+[include]
+	path = ~/.gitconfig.local
