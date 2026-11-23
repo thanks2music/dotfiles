@@ -11,15 +11,20 @@
 # closed by hand: rebuilding would kill windows that may still run Claude Code.
 # To start over, close main (`tk main`) and run `t`.
 #
-# Windows and panes of a new main session (splits are even):
-#   1:Revo      one-more-time | one-more-time
-#   2:JARVIS    jarvis        | avengers
-#   3:VoiStock  koetabi        | oshitabi
-#               internal-tools | oshitabi/survey
+# The windows of a new main session come from ~/.tmux-main.local (dot.tmux-main.local,
+# not tracked: the directories are machine specific). It is a bash file with one line per
+# window, `window <name> <dir>...`, and 1, 2 or 4 directories per window (splits are even):
+#
+#   window web  ~/src/web ~/src/web     # 2 dirs: left | right
+#   window api  ~/src/api ~/src/worker \
+#               ~/src/db  ~/src/infra   # 4 dirs: top left, top right, bottom left, bottom right
+#
+# Without that file, main is one window in $HOME. See dot.tmux-main.local.example.
 
 set -eu
 
 session=main
+layout=${TMUX_MAIN_LAYOUT:-$HOME/.tmux-main.local}
 
 command -v tmux >/dev/null 2>&1 || { echo 'tmux-main: tmux not found' >&2; exit 1; }
 
@@ -38,18 +43,27 @@ if $auto; then
   fi
 fi
 
-if ! tmux has-session -t "=$session" 2>/dev/null; then
-  omt=$HOME/work/dev/my-projects/one-more-time
-  jarvis=$HOME/work/dev/my-projects/jarvis
-  avengers=$HOME/work/dev/my-projects/avengers
-  vs=$HOME/work/voistock/projects
+names=()
+dirs_of=()  # the directories of names[i], joined with \x1f
+window() {
+  if (( $# != 2 && $# != 3 && $# != 5 )); then
+    echo "tmux-main: window ${1:-}: give 1, 2 or 4 directories" >&2
+    return 1
+  fi
+  names+=("$1")
+  shift
+  local IFS=$'\x1f'
+  dirs_of+=("$*")
+}
 
-  # A directory that no longer exists would make tmux fall back to the start directory
-  # silently, so the pane would open in the wrong place without telling anyone.
-  for d in "$omt" "$jarvis" "$avengers" "$vs/koetabi" "$vs/improvement/internal-tools" \
-           "$vs/oshitabi" "$vs/oshitabi/survey"; do
-    [[ -d $d ]] || echo "tmux-main: $d does not exist; the pane opens in \$HOME" >&2
-  done
+if ! tmux has-session -t "=$session" 2>/dev/null; then
+  if [[ -r $layout ]]; then
+    # shellcheck source=/dev/null
+    source "$layout"
+  fi
+  if (( ${#names[@]} == 0 )); then
+    window "${SHELL##*/}" "$HOME"
+  fi
 
   # A detached session starts at 80x24 and the splits are made at that size. Give it the
   # size of the terminal that is about to attach, so the halves stay even after attaching.
@@ -68,19 +82,38 @@ if ! tmux has-session -t "=$session" 2>/dev/null; then
   # Panes are addressed by the ids tmux prints (-P -F), not by index, so base-index and
   # pane-base-index do not matter. A window created with -n keeps its name: tmux turns
   # automatic-rename off for it.
-  revo=$(tmux new-session -d -s "$build" ${size[@]+"${size[@]}"} -n Revo -c "$omt" -P -F '#{pane_id}')
-  tmux split-window -h -t "$revo" -c "$omt"
+  first=
+  for i in "${!names[@]}"; do
+    IFS=$'\x1f' read -r -a dirs <<<"${dirs_of[$i]}"
 
-  jarvis_left=$(tmux new-window -d -t "=$build:" -n JARVIS -c "$jarvis" -P -F '#{pane_id}')
-  tmux split-window -h -t "$jarvis_left" -c "$avengers"
+    # A directory that no longer exists would make tmux fall back to the start directory
+    # silently, so the pane would open in the wrong place without telling anyone.
+    for d in "${dirs[@]}"; do
+      [[ -d $d ]] || echo "tmux-main: $d does not exist; the pane opens in \$HOME" >&2
+    done
 
-  koetabi=$(tmux new-window -d -t "=$build:" -n VoiStock -c "$vs/koetabi" -P -F '#{pane_id}')
-  oshitabi=$(tmux split-window -h -t "$koetabi" -c "$vs/oshitabi" -P -F '#{pane_id}')
-  tmux split-window -v -t "$koetabi" -c "$vs/improvement/internal-tools"
-  tmux split-window -v -t "$oshitabi" -c "$vs/oshitabi/survey"
+    if [[ -z $first ]]; then
+      pane=$(tmux new-session -d -s "$build" ${size[@]+"${size[@]}"} \
+               -n "${names[$i]}" -c "${dirs[0]}" -P -F '#{pane_id}')
+      first=$pane
+    else
+      pane=$(tmux new-window -d -t "=$build:" -n "${names[$i]}" -c "${dirs[0]}" -P -F '#{pane_id}')
+    fi
 
-  tmux select-window -t "$revo"
-  tmux select-pane -t "$revo"
+    case ${#dirs[@]} in
+      2)
+        tmux split-window -h -t "$pane" -c "${dirs[1]}"
+        ;;
+      4)
+        right=$(tmux split-window -h -t "$pane" -c "${dirs[1]}" -P -F '#{pane_id}')
+        tmux split-window -v -t "$pane" -c "${dirs[2]}"
+        tmux split-window -v -t "$right" -c "${dirs[3]}"
+        ;;
+    esac
+  done
+
+  tmux select-window -t "$first"
+  tmux select-pane -t "$first"
 
   if tmux rename-session -t "=$build" "$session" 2>/dev/null; then
     trap - EXIT

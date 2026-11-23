@@ -11,7 +11,7 @@ The one long-lived tmux session named `main`, holding the windows the owner work
 _Avoid_: workspace, session 0 / 1 / 2
 
 **Window**:
-A tmux window inside the main session, shown in the tmux status bar as `<index>:<name>` (for example `1:Revo`). The owner calls these "tabs"; they are not iTerm2 tabs.
+A tmux window inside the main session, shown in the tmux status bar as `<index>:<name>` (for example `1:web`). The owner calls these "tabs"; they are not iTerm2 tabs.
 _Avoid_: tab (when the tmux window is meant)
 
 **Pane**:

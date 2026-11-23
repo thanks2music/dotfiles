@@ -43,7 +43,7 @@ export XDG_CONFIG_HOME="$HOME/.config"
 #
 #   .airc       — CLAUDE_CODE_MAX_OUTPUT_TOKENS 等。Claude Code とその子プロセス向けなので
 #                 .zshrc ではなくここに置く（.zshrc だと非対話に届かない）
-#   .airc.local — API キー。sops + age で暗号化された avengers から
+#   .airc.local — API キー。sops + age で暗号化されたプライベートの設定リポジトリから
 #                 bootstrap.sh が復号して配置する
 [ -f "$HOME/.airc" ]       && source "$HOME/.airc"
 [ -f "$HOME/.airc.local" ] && source "$HOME/.airc.local"

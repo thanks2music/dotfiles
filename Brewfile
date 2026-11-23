@@ -201,7 +201,7 @@ brew "zstd"
 cask "1password"
 cask "1password-cli" # op コマンド。dot.zshrc.local の OP_ACCOUNT で使う
 cask "alfred"
-cask "anthropics/tap/ant", trusted: true # Claude API の CLI。Revolution の ai-writer のローカルの認証 (ant auth login)
+cask "anthropics/tap/ant", trusted: true # Claude API の CLI。個人プロジェクトのローカルの認証 (ant auth login)
 cask "antigravity"
 cask "antigravity-cli"
 cask "appcleaner"
