@@ -59,7 +59,9 @@ brew-up        # run from iTerm2, not Zed: cask upgrades quit running apps (Zed,
 
 - `dot.*` → Symlinked to `~/.*` (e.g., `dot.zshrc` → `~/.zshrc`)
 - `dot.*.example` → Template files copied to `~/.{filename}` if not exists
-- `dot.*.local` → Local overrides (not tracked in git)
+- `dot.*.local` → Local overrides (not tracked in this public repository). A `.local`
+  that should still be versioned (project names, paths) lives in the private avengers repository,
+  whose `bootstrap.sh` symlinks it into `~`; secrets are sops-encrypted there and decrypted into `~`
 - `bin/` → Executable scripts symlinked to `~/bin`
 - `config/` → Configuration files symlinked to `~/.config`
 - `tools/` → Helper scripts run by hand or by git (not linked to `~/bin`)
@@ -124,7 +126,7 @@ interactive shells, so anything defined there never reaches a fresh non-interact
 
 iTerm2 attaches to the `main` session on launch (`dot.zshrc` runs `bin/tmux-main --auto`).
 When it does not exist, it is built from the windows listed in `~/.tmux-main.local`
-(`dot.tmux-main.local`, not tracked; see `dot.tmux-main.local.example`).
+(not in this repository, see `dot.*.local` above; `dot.tmux-main.local.example` shows the format).
 When it exists, it is attached as it is. A second iTerm2 tab, Zed and VS Code stay plain zsh.
 See `GLOSSARY.md` for "main session" and "window" (the owner's "tab" is a tmux window).
 
