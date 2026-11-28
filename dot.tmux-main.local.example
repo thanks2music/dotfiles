@@ -5,8 +5,7 @@
 # With no window lines, main is one window in $HOME. Write only window lines (and comments):
 # other variables set here can clash with the ones tmux-main uses. Quote a name that has
 # spaces: window "web / api" ...
-# The owner's real file is kept in a private repository and linked to ~/.tmux-main.local,
-# because it lists project directories; this copy only shows the format.
+# The owner's real file is not in this repository; this copy only shows the format.
 #
 # window web  "$HOME/src/web" "$HOME/src/web"
 # window api  "$HOME/src/api" "$HOME/src/worker" \
