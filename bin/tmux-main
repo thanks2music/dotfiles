@@ -11,8 +11,9 @@
 # closed by hand: rebuilding would kill windows that may still run Claude Code.
 # To start over, close main (`tk main`) and run `t`.
 #
-# The windows of a new main session come from ~/.tmux-main.local (dot.tmux-main.local,
-# not tracked: the directories are machine specific). It is a bash file with one line per
+# The windows of a new main session come from ~/.tmux-main.local. It lists project
+# directories, so it is not in this public repository: the owner keeps it in a private
+# repository that links it to ~/.tmux-main.local. It is a bash file with one line per
 # window, `window <name> <dir>...`, and 1, 2 or 4 directories per window (splits are even):
 #
 #   window web  ~/src/web ~/src/web     # 2 dirs: left | right
