@@ -59,7 +59,7 @@ brew-up        # run from iTerm2, not Zed: cask upgrades quit running apps (Zed,
 
 - `dot.*` → Symlinked to `~/.*` (e.g., `dot.zshrc` → `~/.zshrc`)
 - `dot.*.example` → Template files copied to `~/.{filename}` if not exists
-- `dot.*.local` → Local overrides (not tracked in git). This repository is public: a `.local`
+- `dot.*.local` → Local overrides (not tracked in this public repository). A `.local`
   that should still be versioned (project names, paths) lives in the private avengers repository,
   whose `bootstrap.sh` symlinks it into `~`; secrets are sops-encrypted there and decrypted into `~`
 - `bin/` → Executable scripts symlinked to `~/bin`
