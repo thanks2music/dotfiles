@@ -28,8 +28,10 @@ Karabiner の設定だけでなく、同じ目的で変えた Claude Code と Ze
 | ルール | 動作 |
 |---|---|
 | `cmd+q` 長押し | `cmd+q` を 1 秒押し続けたときだけアプリを終了する。短く押しても何も起きない |
-| Hyper（Tab 長押し） | Tab を押している間は ⌘+ctrl+⌥+⇧ を同時に押した状態になる。単独で押して離すと Tab |
+| Hyper（Tab 長押し） | Tab を押している間は ⌘+ctrl+⌥+⇧ を同時に押した状態になる（Shift は右 Shift として押す）。単独で押して離すと Tab |
 | Hyper + h/j/k/l | ← ↓ ↑ → |
+| Hyper + Space / 左⇧+Space | PageDown / PageUp |
+| Hyper + g g / 左⇧+g | Home / End（ページの最上部 / 最下部）。g g は 500ms 以内に 2 回押す。1 回だけでは何も起きない |
 | Hyper + o / t / p | Obsidian / Todoist / 1Password を前面に出す。起動していなければ起動する |
 | Hyper + Esc | iTerm が前面のときだけ `ctrl+]` に変換する。Claude Code の取り消しに使う |
 | ⌘ 単独 | 左 ⌘ は英数、右 ⌘ はかな |
@@ -62,6 +64,27 @@ Tab には既知の弱点がある。押した瞬間には、Tab として使う
 
 - `shift+tab`（Claude Code のモード切り替えなど）はルールの対象外にしてあり、従来どおり動く
 - Tab を 1 秒以上押してから離すと、Tab は送られない（Karabiner の `to_if_alone` の既定のタイムアウト）
+
+### Hyper の Shift を右 Shift にした（左 Shift で逆方向にするため）
+
+Hyper + Space で PageDown、Hyper + Shift + Space で PageUp、のように Shift で逆方向にしたかった。ところが Hyper は Shift も押した状態を作るため、そのままでは Shift の有無を見分けられない。
+
+Karabiner は修飾キーを左右別に、押されているかどうか（オン / オフ）だけで判定する。Hyper が左 Shift を押していると、物理の左 Shift を足しても `left_shift` はオンのままで状態が変わらない。そのため「Hyper + Space」と「Hyper + 左 Shift + Space」はルールから同じに見える。
+
+Tab は左手で押すので、逆方向も左 Shift で押したい。そこで Hyper が押す Shift を右 Shift に変えた。物理の左 Shift を足すと `left_shift` が新たにオンになるので見分けられる。
+
+- 既存の Hyper ルール（hjkl・o/t/p・Esc）は条件を「Shift（左右どちらでも可）」で書いているので、そのまま動く
+- アプリには従来どおり ⌘+ctrl+⌥+⇧ として届く。Zed の `cmd-ctrl-alt-shift-escape` も変わらない
+- 代わりに「Hyper + 右 Shift」は見分けられない。使わない前提である
+- 採用しなかった案: Hyper を変数方式（Tab 長押しで変数を立てるだけ）に作り直す案。Shift は自然に区別できるが、既存ルールと Zed の割り当てをすべて書き直す必要があり、割り当てのない Hyper + 文字がそのまま入力されるようになる
+
+### スクロールは物理キーを送るだけにした
+
+Hyper + h/j/k/l を矢印キーにしたのと同じ考え方で、PageDown / PageUp / Home / End のキーを送るだけにし、どう動くかはアプリに任せた。HHKB に無いこれらのキーを Hyper で補う意味もある。
+
+- ⌘+↑/↓ を送る案は採用しなかった。Finder の ⌘+↑ は「親フォルダへ移動」で、全アプリ共通にすると事故が起きる
+- iTerm では Home / End がシェルの行頭・行末への移動になり、スクロールにはならない。承知のうえでアプリごとの分岐は入れていない
+- g g は vim と同じく 2 回押しにした。1 回目の Hyper + g で変数 `hyper_g_pending` を立て、500ms（Karabiner の `to_delayed_action` の既定）以内に 2 回目が来たら Home を送る。間に別のキーを押すと待ちは取り消される
 
 ### Esc で止めず、Hyper+Esc で止めるようにした
 

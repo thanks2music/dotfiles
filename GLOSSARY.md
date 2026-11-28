@@ -17,3 +17,13 @@ _Avoid_: tab (when the tmux window is meant)
 **Pane**:
 One split region of a window, opened in a project directory.
 _Avoid_: split, screen
+
+### Keyboard
+
+**Hyper**:
+Holding Tab, which acts as ⌘+ctrl+⌥+⇧ pressed together so that "Hyper + key" never clashes with an app's own shortcut. Tapped alone, Tab is still Tab.
+_Avoid_: Hyper key (for the Tab key itself), meh
+
+**Hyper + Shift**:
+Hyper with the physical left Shift added, used for the reverse direction of a Hyper action (for example page up instead of page down). The right Shift does not count.
+_Avoid_: Shift+Hyper
