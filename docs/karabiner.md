@@ -20,6 +20,8 @@ Karabiner の設定だけでなく、同じ目的で変えた Claude Code と Ze
 - `config/karabiner/automatic_backups/` は Karabiner が自動で作る履歴なので、`.gitignore` で除外している
 - 設定は GUI で編集しても、`karabiner.json` を直接編集してもよい。どちらも保存した時点で反映される。反映されたかどうかは `~/.local/share/karabiner/log/console_user_server.log` に出る `core_configuration is updated.` で確認できる
 - 新しい Mac に設定を置いた直後に読み込まれない場合は、`launchctl kickstart -k gui/$(id -u)/org.pqrs.service.agent.Karabiner-Console-User-Server-v3` を実行する。Karabiner 15 以降はサービス名の末尾に `-v3` が付く。公式ドキュメントの例には `-v3` が無いので、そのままでは見つからない
+  - ここで `-k` を付けるのは、Karabiner のサービスを再起動して設定を読み直させるためである。`brew-update-check` などの LaunchAgent で `-k` を付けないのとは目的が違う
+- `config/karabiner/assets/complex_modifications/` は、GUI の「Add rule」に出すルール集の置き場である（2024 年に取り込んだもの）。このうち「⌘Q を 2 回押して終了」は `cmd+q` 長押しのルールとぶつかるので、有効にしない。使っているルールはすべて `karabiner.json` にある
 
 ## ルール一覧
 
@@ -84,7 +86,7 @@ Hyper + h/j/k/l を矢印キーにしたのと同じ考え方で、PageDown / Pa
 
 - ⌘+↑/↓ を送る案は採用しなかった。Finder の ⌘+↑ は「親フォルダへ移動」で、全アプリ共通にすると事故が起きる
 - iTerm では Home / End がシェルの行頭・行末への移動になり、スクロールにはならない。承知のうえでアプリごとの分岐は入れていない
-- g g は vim と同じく 2 回押しにした。1 回目の Hyper + g で変数 `hyper_g_pending` を立て、500ms（Karabiner の `to_delayed_action` の既定）以内に 2 回目が来たら Home を送る。間に別のキーを押すと待ちは取り消される
+- g g は vim と同じく 2 回押しにした。1 回目の Hyper + g で変数 `hyper_g_pending` を立て、500ms 以内（`basic.to_delayed_action_delay_milliseconds` で明示している。値は Karabiner の既定と同じ）に 2 回目が来たら Home を送る。間に別のキーを押すと待ちは取り消される
 
 ### Esc で止めず、Hyper+Esc で止めるようにした
 
@@ -102,7 +104,7 @@ Karabiner は画面の状態（いま質問 UI が出ているか）を知るこ
   - 質問カード（`Elicitation`）、vim ノーマルモードの入力欄、スレッド全体（`AcpThread`）で `escape` を `null` にした
   - Hyper+Esc（`cmd-ctrl-alt-shift-escape`）を、入力欄では `editor::Cancel`、スレッドでは `menu::Cancel` に割り当てた。どちらも生成の停止と質問の取り消しにつながる
   - vim の挿入モードからノーマルモードに戻る Esc（`vim::NormalBefore`）は壊さないよう、入力欄全体の Esc は `null` にしていない
-  - コンテキスト名とアクション名は、Zed v1.30.2 のソース（`crates/agent_ui/src/message_editor.rs`、`assets/keymaps/default-macos.json`、`assets/keymaps/vim.json`）で確かめた。Zed の公式ドキュメントにはエージェントパネルのキー設定がほぼ書かれていない
+  - コンテキスト名とアクション名は、Zed v1.30.2 のソース（`crates/agent_ui/src/message_editor.rs`、`assets/keymaps/default-macos.json`、`assets/keymaps/vim.json`）で確かめた。Zed の公式ドキュメントにはエージェントパネルのキー設定がほぼ書かれていない。内部の名前なので、Zed を更新して効かなくなったら、まずこれらの名前が変わっていないか確かめる
 
 ### Zed でも `ctrl+j` で改行できるようにした
 
