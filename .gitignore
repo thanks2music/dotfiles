@@ -18,3 +18,6 @@ docs/handoff
 docs/reading-queue
 docs/report 
 docs/review
+
+# Karabiner-Elements が自動で作る設定の履歴（config/karabiner/ は ~/.config/karabiner へディレクトリごと symlink している）
+config/karabiner/automatic_backups/

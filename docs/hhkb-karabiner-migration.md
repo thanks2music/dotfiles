@@ -49,7 +49,7 @@ HHKB の機種によって必要なドライバやツールが異なる。以下
 ### 移行前にやっておくとよいこと
 
 - [ ] 旧 Mac が手元にあるうちに、HHKB のキーマップ（Fn の位置など）を Professional キーマップ変更ツールで確認し、スクリーンショットを残しておく。
-- [ ] Karabiner の設定（`~/.config/karabiner/karabiner.json`）を dotfiles で管理しておく。現状は未登録で、移行時に手で復元する必要がある。
+- [x] Karabiner の設定を dotfiles で管理しておく。2026-11-28 に `~/.config/karabiner` をディレクトリごと `config/karabiner/` へ移し、`setup.sh` が symlink を張るようにした。ルールと判断の経緯は [karabiner.md](karabiner.md) にまとめた。
 
 ---
 
