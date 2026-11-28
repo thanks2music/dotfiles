@@ -12,8 +12,6 @@ tags
 *.MWebMetaData
 .claude/*.local.json
 **/CLAUDE.md
-**/AGENTS.md
-**/GEMINI.md
 **/CLAUDE.*.md
 **/DEVELOPMENT.md
 **/private/**
