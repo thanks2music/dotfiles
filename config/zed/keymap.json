@@ -1,0 +1,80 @@
+// Zed keymap
+//
+// For information on binding keys, see the Zed
+// documentation: https://zed.dev/docs/key-bindings
+//
+// To see the default key bindings run `zed: open default keymap`
+// from the command palette.
+[
+  {
+    "context": "Workspace",
+    "bindings": {
+      // "shift shift": "file_finder::Toggle"
+    },
+  },
+  {
+    "context": "Editor && vim_mode == insert",
+    "bindings": {
+      // "j k": "vim::NormalBefore"
+    },
+  },
+  {
+    "bindings": {
+      "cmd-shift-a": "agent::Toggle"
+    }
+  },
+  {
+    "bindings": {
+      "cmd-shift-o": "projects::OpenRecent",
+      "cmd-alt-o": "projects::OpenRecent",
+      "cmd-alt-shift-o": ["projects::OpenRecent", { "create_new_window": true }],
+      "cmd-:": "multi_workspace::FocusWorkspaceSidebar",
+      "cmd-shift-i": "agent::ToggleFocus"
+    }
+  },
+  {
+    "context": "Workspace",
+    "bindings": {
+      "cmd-shift-n": null,
+      "cmd-shift-ctrl-n": "workspace::NewWindow"
+    }
+  },
+  {
+    "bindings": {
+      "cmd-shift-n": "agents_sidebar::NewThreadInGroup"
+    }
+  },
+  // ---- エージェントパネル（Claude Code / ACP）を iTerm の Claude Code に揃える ----
+  // 経緯と根拠は ~/dotfiles/docs/karabiner.md。Hyper は Karabiner の Tab 長押し（cmd-ctrl-alt-shift）。
+  {
+    // 改行を iTerm の Claude Code（ctrl+j）と揃える。既定の shift-enter / ctrl-enter も残る
+    "context": "AcpThread > MessageEditor > Editor",
+    "bindings": {
+      "ctrl-j": "editor::Newline",
+      // Hyper+Esc で生成を止める（MessageEditor の editor::Cancel が生成停止につながる）
+      "cmd-ctrl-alt-shift-escape": "editor::Cancel"
+    }
+  },
+  {
+    // vim ノーマルモードの Esc で生成を止めない。挿入モードの Esc（vim::NormalBefore）は残す
+    "context": "MessageEditor > Editor && vim_mode == normal && !menu",
+    "bindings": {
+      "escape": null
+    }
+  },
+  {
+    // 質問カード（AskUserQuestion）を Esc で閉じない
+    "context": "Elicitation || (Elicitation > Editor)",
+    "bindings": {
+      "escape": null
+    }
+  },
+  {
+    // 入力欄の外の Esc（menu::Cancel）で止めない。止める・質問を取り消すのは Hyper+Esc だけ
+    "context": "AcpThread",
+    "bindings": {
+      "escape": null,
+      "cmd-ctrl-alt-shift-escape": "menu::Cancel"
+    }
+  }
+]
