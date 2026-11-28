@@ -560,3 +560,9 @@ typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 # zoxide
 type zoxide > /dev/null 2>&1 && eval "$(zoxide init zsh)"
 
+# iTerm2 shell integration ------------------------------------------------------
+# プロンプトのマーク・コマンドの完了通知・直前の出力の選択などを iTerm2 に伝える。
+#   本体は iTerm2 > Install Shell Integration が置く ~/.iterm2_shell_integration.zsh（無い Mac では何もしない）。
+#   tmux の中では既定で無効（有効にできるのは tmux -CC だけ。公式 documentation-shell-integration）。
+#   NOTE: インストーラーは "iterm2_shell_integration" の文字列でこの行を探すので、書き換えない。
+test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
